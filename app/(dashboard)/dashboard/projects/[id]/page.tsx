@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { DatasetUploader } from '@/components/analysis/DatasetUploader'
+import { BatchUploader } from '@/components/analysis/BatchUploader'
 import { PlotlyChart } from '@/components/analysis/PlotlyChart'
 import { DataTable } from '@/components/analysis/DataTable'
 import { AIChat } from '@/components/ai/AIChat'
@@ -472,8 +473,21 @@ export default function ProjectDetailPage() {
 
         {/* Upload Tab */}
         <TabsContent value="upload">
-          <div className="max-w-2xl mx-auto">
-            <DatasetUploader projectId={projectId} onUploadComplete={fetchProject} />
+          <div className="max-w-4xl mx-auto space-y-6">
+            <Tabs defaultValue="single">
+              <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto">
+                <TabsTrigger value="single">Single Upload</TabsTrigger>
+                <TabsTrigger value="batch">Batch Upload</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="single" className="mt-6">
+                <DatasetUploader projectId={projectId} onUploadComplete={fetchProject} />
+              </TabsContent>
+
+              <TabsContent value="batch" className="mt-6">
+                <BatchUploader projectId={projectId} onUploadComplete={fetchProject} />
+              </TabsContent>
+            </Tabs>
           </div>
         </TabsContent>
       </Tabs>
