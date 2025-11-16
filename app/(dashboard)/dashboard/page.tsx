@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { FolderOpen, PlusCircle, FileText, Database, Zap } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { Analytics } from '@/components/dashboard/Analytics'
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<any[]>([])
@@ -84,7 +85,14 @@ export default function DashboardPage() {
       {/* Analytics Dashboard */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-6">Research Analytics</h2>
-        <Analytics />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Analytics />
+          </div>
+          <div>
+            <ActivityFeed limit={15} />
+          </div>
+        </div>
       </div>
 
       {/* Recent Projects */}

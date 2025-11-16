@@ -7,6 +7,8 @@ import { Zap, Home, FolderOpen, Settings, LogOut, PlusCircle } from 'lucide-reac
 import { Button } from '@/components/ui/button'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { KeyboardShortcutsModal } from '@/components/shared/KeyboardShortcutsModal'
+import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts'
 
 export default function DashboardLayout({
   children,
@@ -18,6 +20,9 @@ export default function DashboardLayout({
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [projects, setProjects] = useState<any[]>([])
+
+  // Enable keyboard shortcuts
+  useKeyboardShortcuts()
 
   useEffect(() => {
     checkAuth()
@@ -139,6 +144,9 @@ export default function DashboardLayout({
 
       {/* Command Palette */}
       <CommandPalette projects={projects} />
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal />
     </div>
   )
 }

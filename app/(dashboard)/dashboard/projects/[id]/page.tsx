@@ -9,6 +9,7 @@ import { DatasetUploader } from '@/components/analysis/DatasetUploader'
 import { BatchUploader } from '@/components/analysis/BatchUploader'
 import { PlotlyChart } from '@/components/analysis/PlotlyChart'
 import { DataTable } from '@/components/analysis/DataTable'
+import { DatasetStats } from '@/components/analysis/DatasetStats'
 import { AIChat } from '@/components/ai/AIChat'
 import { Database, FileText, BarChart3, Upload, Trash2 } from 'lucide-react'
 import { formatDate, formatFileSize } from '@/lib/utils'
@@ -289,6 +290,9 @@ export default function ProjectDetailPage() {
             {/* Dataset Details */}
             {selectedDataset && (
               <div className="space-y-4">
+                {/* Quick Stats */}
+                <DatasetStats dataset={selectedDataset} />
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Dataset Details</CardTitle>
