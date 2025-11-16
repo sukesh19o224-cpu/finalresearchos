@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { CommandPalette } from '@/components/shared/CommandPalette'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { KeyboardShortcutsModal } from '@/components/shared/KeyboardShortcutsModal'
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour'
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts'
 
 export default function DashboardLayout({
@@ -102,6 +103,16 @@ export default function DashboardLayout({
             </Button>
           </Link>
 
+          <Link href="/dashboard/settings">
+            <Button
+              variant={pathname === '/dashboard/settings' ? 'secondary' : 'ghost'}
+              className="w-full justify-start"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+          </Link>
+
           <div className="pt-4">
             <Link href="/dashboard/projects/new">
               <Button className="w-full justify-start">
@@ -147,6 +158,9 @@ export default function DashboardLayout({
 
       {/* Keyboard Shortcuts Modal */}
       <KeyboardShortcutsModal />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour />
     </div>
   )
 }
