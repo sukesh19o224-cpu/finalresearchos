@@ -34,7 +34,7 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
-      type: 'success',
+      type: 'success' as const,
       title: 'Analysis Complete',
       message: 'Your CV analysis has finished processing',
       createdAt: new Date(Date.now() - 300000),
@@ -43,7 +43,7 @@ export function NotificationCenter() {
     },
     {
       id: '2',
-      type: 'collaboration',
+      type: 'collaboration' as const,
       title: 'New Comment',
       message: 'Dr. Smith commented on your Experiment #3',
       createdAt: new Date(Date.now() - 600000),
@@ -52,7 +52,7 @@ export function NotificationCenter() {
     },
     {
       id: '3',
-      type: 'info',
+      type: 'info' as const,
       title: 'Data Quality Check',
       message: 'Detected 2 outliers in your latest dataset',
       createdAt: new Date(Date.now() - 1800000),
