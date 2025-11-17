@@ -26,7 +26,7 @@ export function NotificationBell() {
     const mockNotifications: Notification[] = [
       {
         id: '1',
-        type: 'success',
+        type: 'success' as const,
         title: 'Analysis Complete',
         message: 'CV analysis for battery_test_01.csv is ready',
         timestamp: new Date(Date.now() - 1000 * 60 * 5),
@@ -34,7 +34,7 @@ export function NotificationBell() {
       },
       {
         id: '2',
-        type: 'info',
+        type: 'info' as const,
         title: 'New Collaboration',
         message: 'John Doe invited you to "EIS Study Project"',
         timestamp: new Date(Date.now() - 1000 * 60 * 30),
@@ -42,7 +42,7 @@ export function NotificationBell() {
       },
       {
         id: '3',
-        type: 'warning',
+        type: 'warning' as const,
         title: 'Storage Alert',
         message: 'You\'re using 80% of your storage quota',
         timestamp: new Date(Date.now() - 1000 * 60 * 120),

@@ -54,29 +54,29 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
     // Simulate API call - replace with actual search API
     await new Promise(resolve => setTimeout(resolve, 300))
 
-    const mockResults: SearchResult[] = [
+    const mockResults: SearchResult[] = ([
       {
         id: '1',
         title: 'Battery Cycling Project',
-        type: 'project',
+        type: 'project' as const,
         description: 'Li-ion battery performance study',
         url: '/dashboard/projects/1',
       },
       {
         id: '2',
         title: 'CV_sample_01.csv',
-        type: 'dataset',
+        type: 'dataset' as const,
         description: 'Cyclic voltammetry data',
         url: '/dashboard/projects/1',
       },
       {
         id: '3',
         title: 'Nyquist Plot Analysis',
-        type: 'visualization',
+        type: 'visualization' as const,
         description: 'EIS impedance analysis',
         url: '/dashboard/projects/1',
       },
-    ].filter(item =>
+    ] as SearchResult[]).filter(item =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )

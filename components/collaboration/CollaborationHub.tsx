@@ -61,8 +61,8 @@ export function CollaborationHub({ projectId }: { projectId: string }) {
       id: '1',
       name: 'You',
       email: 'you@example.com',
-      role: 'owner',
-      status: 'active',
+      role: 'owner' as const,
+      status: 'active' as const,
       joinedAt: '2024-01-01',
       lastActive: 'Now',
     },
@@ -83,7 +83,7 @@ export function CollaborationHub({ projectId }: { projectId: string }) {
       name: inviteEmail.split('@')[0],
       email: inviteEmail,
       role: inviteRole,
-      status: 'pending',
+      status: 'pending' as const,
     }
 
     setCollaborators([...collaborators, newCollaborator])

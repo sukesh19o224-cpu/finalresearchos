@@ -33,7 +33,7 @@ interface TimelineEvent {
 const mockEvents: TimelineEvent[] = [
   {
     id: '1',
-    type: 'upload',
+    type: 'upload' as const,
     title: 'Uploaded dataset',
     description: 'CV_battery_test_01.csv',
     timestamp: new Date(Date.now() - 1000 * 60 * 10),
@@ -41,7 +41,7 @@ const mockEvents: TimelineEvent[] = [
   },
   {
     id: '2',
-    type: 'create',
+    type: 'create' as const,
     title: 'Created visualization',
     description: 'Nyquist plot for EIS analysis',
     timestamp: new Date(Date.now() - 1000 * 60 * 60),
@@ -49,7 +49,7 @@ const mockEvents: TimelineEvent[] = [
   },
   {
     id: '3',
-    type: 'comment',
+    type: 'comment' as const,
     title: 'Added comment',
     description: 'Peak current observed at 0.5V vs Ag/AgCl',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
@@ -57,7 +57,7 @@ const mockEvents: TimelineEvent[] = [
   },
   {
     id: '4',
-    type: 'share',
+    type: 'share' as const,
     title: 'Shared project',
     description: 'Invited Dr. Smith as collaborator',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5),
@@ -65,7 +65,7 @@ const mockEvents: TimelineEvent[] = [
   },
   {
     id: '5',
-    type: 'export',
+    type: 'export' as const,
     title: 'Exported data',
     description: 'Project data exported to CSV format',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
