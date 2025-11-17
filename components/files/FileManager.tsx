@@ -1,24 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Folder,
-  File,
   FolderPlus,
-  Upload,
   Trash2,
   Edit,
   MoreVertical,
-  ChevronRight,
-  ChevronDown,
   Home,
   FileText,
   Image as ImageIcon,
   FileCode,
+  ArrowLeft,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -27,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { formatDate, formatFileSize } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 
 interface FileNode {
@@ -35,148 +31,151 @@ interface FileNode {
   name: string
   type: 'file' | 'folder'
   size?: number
-  createdAt: string
-  updatedAt: string
-  parentId: string | null
-  children?: FileNode[]
+  createdAt: Date
+  children: FileNode[]
 }
 
 interface FileManagerProps {
   projectId: string
 }
 
+// Initialize with some sample folders
+const createInitialStructure = (): FileNode[] => [
+  {
+    id: '1',
+    name: 'Experiments',
+    type: 'folder',
+    createdAt: new Date(),
+    children: [],
+  },
+  {
+    id: '2',
+    name: 'Analysis',
+    type: 'folder',
+    createdAt: new Date(),
+    children: [],
+  },
+  {
+    id: '3',
+    name: 'Documentation',
+    type: 'folder',
+    createdAt: new Date(),
+    children: [],
+  },
+]
+
 export function FileManager({ projectId }: FileManagerProps) {
-  const [currentPath, setCurrentPath] = useState<string[]>([])
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
-  const [files, setFiles] = useState<FileNode[]>([])
-  const [allFolders, setAllFolders] = useState<FileNode[]>([])
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+  const [fileSystem, setFileSystem] = useState<FileNode[]>(createInitialStructure())
+  const [currentPath, setCurrentPath] = useState<number[]>([])
   const [isCreatingFolder, setIsCreatingFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
   const { toast } = useToast()
 
-  useEffect(() => {
-    fetchFiles()
-  }, [currentFolderId, projectId])
-
-  const fetchFiles = async () => {
-    try {
-      const query = currentFolderId ? `?folderId=${currentFolderId}` : ''
-      const res = await fetch(`/api/projects/${projectId}/files${query}`)
-      const data = await res.json()
-      setFiles(data.files || [])
-      setAllFolders(data.folders || [])
-    } catch (error) {
-      console.error('Failed to fetch files:', error)
+  // Get current folder based on path
+  const getCurrentFolder = (): FileNode[] => {
+    let current = fileSystem
+    for (const index of currentPath) {
+      if (current[index] && current[index].type === 'folder') {
+        current = current[index].children
+      }
     }
+    return current
   }
 
-  const createFolder = async () => {
+  const getCurrentFolderName = (): string => {
+    if (currentPath.length === 0) return 'Project Root'
+    let current = fileSystem
+    let name = ''
+    for (const index of currentPath) {
+      name = current[index].name
+      current = current[index].children
+    }
+    return name
+  }
+
+  const createFolder = () => {
     if (!newFolderName.trim()) return
 
-    try {
-      const res = await fetch(`/api/projects/${projectId}/files`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newFolderName,
-          type: 'folder',
-          parentId: currentFolderId,
-        }),
-      })
-
-      if (!res.ok) throw new Error('Failed to create folder')
-
-      toast({
-        variant: 'success',
-        title: 'Folder created',
-        description: `"${newFolderName}" has been created successfully.`,
-      })
-
-      setNewFolderName('')
-      setIsCreatingFolder(false)
-      await fetchFiles()
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to create folder',
-        description: error.message,
-      })
+    const newFolder: FileNode = {
+      id: Date.now().toString(),
+      name: newFolderName,
+      type: 'folder',
+      createdAt: new Date(),
+      children: [],
     }
+
+    const newFileSystem = [...fileSystem]
+    let current = newFileSystem
+    for (const index of currentPath) {
+      current = current[index].children
+    }
+    current.push(newFolder)
+
+    setFileSystem(newFileSystem)
+    setNewFolderName('')
+    setIsCreatingFolder(false)
+
+    toast({
+      title: 'Folder created',
+      description: `"${newFolderName}" has been created successfully.`,
+    })
   }
 
-  const deleteItem = async (itemId: string, itemName: string) => {
+  const deleteItem = (itemIndex: number) => {
+    const items = getCurrentFolder()
+    const itemName = items[itemIndex].name
+
     if (!confirm(`Delete "${itemName}"?`)) return
 
-    try {
-      await fetch(`/api/projects/${projectId}/files/${itemId}`, {
-        method: 'DELETE',
-      })
-
-      toast({
-        title: 'Deleted',
-        description: `"${itemName}" has been deleted.`,
-      })
-
-      await fetchFiles()
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to delete',
-        description: error.message,
-      })
+    const newFileSystem = [...fileSystem]
+    let current = newFileSystem
+    for (const index of currentPath) {
+      current = current[index].children
     }
+    current.splice(itemIndex, 1)
+
+    setFileSystem(newFileSystem)
+
+    toast({
+      title: 'Deleted',
+      description: `"${itemName}" has been deleted.`,
+    })
   }
 
-  const renameItem = async (itemId: string, currentName: string) => {
+  const renameItem = (itemIndex: number) => {
+    const items = getCurrentFolder()
+    const currentName = items[itemIndex].name
     const newName = prompt(`Rename "${currentName}" to:`, currentName)
+
     if (!newName || newName === currentName) return
 
-    try {
-      await fetch(`/api/projects/${projectId}/files/${itemId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newName }),
-      })
+    const newFileSystem = [...fileSystem]
+    let current = newFileSystem
+    for (const index of currentPath) {
+      current = current[index].children
+    }
+    current[itemIndex].name = newName
 
-      toast({
-        variant: 'success',
-        title: 'Renamed',
-        description: `Renamed to "${newName}"`,
-      })
+    setFileSystem(newFileSystem)
 
-      await fetchFiles()
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to rename',
-        description: error.message,
-      })
+    toast({
+      title: 'Renamed',
+      description: `Renamed to "${newName}"`,
+    })
+  }
+
+  const openFolder = (itemIndex: number) => {
+    setCurrentPath([...currentPath, itemIndex])
+  }
+
+  const goBack = () => {
+    if (currentPath.length > 0) {
+      setCurrentPath(currentPath.slice(0, -1))
     }
   }
 
-  const navigateToFolder = (folderId: string | null, folderName?: string) => {
-    if (folderId === null) {
-      setCurrentPath([])
-      setCurrentFolderId(null)
-    } else {
-      if (folderName) {
-        setCurrentPath([...currentPath, folderName])
-      }
-      setCurrentFolderId(folderId)
-    }
-  }
-
-  const navigateToPathIndex = (index: number) => {
-    if (index === -1) {
-      navigateToFolder(null)
-    } else {
-      const newPath = currentPath.slice(0, index + 1)
-      setCurrentPath(newPath)
-      // Find folder ID based on path
-      // For now, just go to root
-      setCurrentFolderId(null)
-    }
+  const goToRoot = () => {
+    setCurrentPath([])
   }
 
   const getFileIcon = (file: FileNode) => {
@@ -187,224 +186,161 @@ export function FileManager({ projectId }: FileManagerProps) {
     return FileText
   }
 
+  const currentItems = getCurrentFolder()
+
   return (
-    <div className="flex h-[600px] border rounded-lg overflow-hidden bg-background">
-      {/* Left Sidebar - Folder Tree */}
-      <div className="w-64 border-r bg-muted/10">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold text-sm flex items-center">
-            <Folder className="h-4 w-4 mr-2" />
-            Folders
-          </h3>
-        </div>
-        <ScrollArea className="h-[calc(100%-57px)]">
-          <div className="p-2">
-            <FolderTreeNode
-              folder={{ id: 'root', name: 'Project Root', type: 'folder', children: allFolders, createdAt: '', updatedAt: '', parentId: null }}
-              currentFolderId={currentFolderId}
-              onSelect={(id) => navigateToFolder(id === 'root' ? null : id)}
-              level={0}
-            />
+    <div className="relative h-[600px] border rounded-lg overflow-hidden bg-white">
+      {/* Toolbar */}
+      <div className="p-3 border-b flex items-center justify-between bg-gray-50">
+        <div className="flex items-center space-x-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={goBack}
+            disabled={currentPath.length === 0}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={goToRoot}
+            disabled={currentPath.length === 0}
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+          <div className="px-3 py-1 bg-white border rounded text-sm font-medium">
+            {getCurrentFolderName()}
           </div>
-        </ScrollArea>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Button
+            size="sm"
+            onClick={() => setIsCreatingFolder(true)}
+          >
+            <FolderPlus className="h-4 w-4 mr-2" />
+            New Folder
+          </Button>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <div className="p-4 border-b flex items-center justify-between bg-muted/10">
+      {/* New Folder Input */}
+      {isCreatingFolder && (
+        <div className="p-3 border-b bg-blue-50">
           <div className="flex items-center space-x-2">
-            <Button
-              size="sm"
-              variant="default"
-              onClick={() => setIsCreatingFolder(true)}
-            >
-              <FolderPlus className="h-4 w-4 mr-2" />
-              New Folder
-            </Button>
-            <Button size="sm" variant="outline">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Files
-            </Button>
-          </div>
-
-          {/* Breadcrumb */}
-          <div className="flex items-center text-sm text-muted-foreground">
-            <button
-              onClick={() => navigateToPathIndex(-1)}
-              className="hover:text-foreground flex items-center"
-            >
-              <Home className="h-4 w-4" />
-            </button>
-            {currentPath.map((path, index) => (
-              <div key={index} className="flex items-center">
-                <ChevronRight className="h-4 w-4 mx-1" />
-                <button
-                  onClick={() => navigateToPathIndex(index)}
-                  className="hover:text-foreground"
-                >
-                  {path}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* New Folder Input */}
-        {isCreatingFolder && (
-          <div className="p-4 border-b bg-blue-50 dark:bg-blue-950/20">
-            <div className="flex items-center space-x-2">
-              <Folder className="h-5 w-5 text-blue-600" />
-              <Input
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Folder name"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') createFolder()
-                  if (e.key === 'Escape') {
-                    setIsCreatingFolder(false)
-                    setNewFolderName('')
-                  }
-                }}
-                autoFocus
-                className="max-w-xs"
-              />
-              <Button size="sm" onClick={createFolder}>
-                Create
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
+            <Folder className="h-5 w-5 text-blue-600" />
+            <Input
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              placeholder="New folder name"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') createFolder()
+                if (e.key === 'Escape') {
                   setIsCreatingFolder(false)
                   setNewFolderName('')
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* File List */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            {files.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Folder className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>This folder is empty</p>
-                <p className="text-sm mt-1">Create a folder or upload files to get started</p>
-              </div>
-            ) : (
-              <div className="grid gap-2">
-                {files.map((file) => {
-                  const Icon = getFileIcon(file)
-                  return (
-                    <div
-                      key={file.id}
-                      className={`flex items-center p-3 rounded-lg border hover:bg-muted/50 cursor-pointer group ${
-                        selectedItems.has(file.id) ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-500' : ''
-                      }`}
-                      onClick={() => {
-                        if (file.type === 'folder') {
-                          navigateToFolder(file.id, file.name)
-                        }
-                      }}
-                    >
-                      <Icon className={`h-5 w-5 mr-3 ${file.type === 'folder' ? 'text-blue-600' : 'text-gray-600'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{file.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {file.type === 'folder' ? 'Folder' : formatFileSize(file.size || 0)} •{' '}
-                          {formatDate(file.updatedAt)}
-                        </p>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="opacity-0 group-hover:opacity-100"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => renameItem(file.id, file.name)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Rename
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => deleteItem(file.id, file.name)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </div>
-    </div>
-  )
-}
-
-// Folder Tree Node Component
-function FolderTreeNode({
-  folder,
-  currentFolderId,
-  onSelect,
-  level = 0,
-}: {
-  folder: FileNode
-  currentFolderId: string | null
-  onSelect: (id: string) => void
-  level: number
-}) {
-  const [isExpanded, setIsExpanded] = useState(level === 0)
-  const hasChildren = folder.children && folder.children.length > 0
-
-  return (
-    <div>
-      <button
-        className={`w-full flex items-center px-2 py-1.5 rounded text-sm hover:bg-muted ${
-          currentFolderId === folder.id ? 'bg-muted font-medium' : ''
-        }`}
-        style={{ paddingLeft: `${level * 12 + 8}px` }}
-        onClick={() => {
-          onSelect(folder.id)
-          if (hasChildren) setIsExpanded(!isExpanded)
-        }}
-      >
-        {hasChildren && (
-          <span className="mr-1">
-            {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-          </span>
-        )}
-        <Folder className="h-4 w-4 mr-2 text-blue-600" />
-        <span className="truncate">{folder.name}</span>
-      </button>
-      {isExpanded && hasChildren && (
-        <div>
-          {folder.children!.map((child) => (
-            <FolderTreeNode
-              key={child.id}
-              folder={child}
-              currentFolderId={currentFolderId}
-              onSelect={onSelect}
-              level={level + 1}
+                }
+              }}
+              autoFocus
+              className="max-w-xs"
             />
-          ))}
+            <Button size="sm" onClick={createFolder}>
+              Create
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setIsCreatingFolder(false)
+                setNewFolderName('')
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
+
+      {/* File List */}
+      <ScrollArea className="h-[calc(100%-120px)]">
+        <div className="p-4">
+          {currentItems.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Folder className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">This folder is empty</p>
+              <p className="text-sm mt-1">Create a new folder to get started</p>
+            </div>
+          ) : (
+            <div className="grid gap-1">
+              {currentItems.map((item, index) => {
+                const Icon = getFileIcon(item)
+                return (
+                  <div
+                    key={item.id}
+                    className="flex items-center p-3 rounded hover:bg-gray-100 cursor-pointer group"
+                    onDoubleClick={() => {
+                      if (item.type === 'folder') {
+                        openFolder(index)
+                      }
+                    }}
+                  >
+                    <Icon
+                      className={`h-6 w-6 mr-3 ${
+                        item.type === 'folder' ? 'text-blue-500' : 'text-gray-600'
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{item.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.type === 'folder' ? 'Folder' : 'File'} •{' '}
+                        {formatDate(item.createdAt)}
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-0 group-hover:opacity-100"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {item.type === 'folder' && (
+                          <DropdownMenuItem onClick={() => openFolder(index)}>
+                            <Folder className="h-4 w-4 mr-2" />
+                            Open
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem onClick={() => renameItem(index)}>
+                          <Edit className="h-4 w-4 mr-2" />
+                          Rename
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => deleteItem(index)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Status Bar */}
+      <div className="absolute bottom-0 left-0 right-0 p-2 border-t bg-gray-50 text-xs text-gray-600">
+        {currentItems.length} {currentItems.length === 1 ? 'item' : 'items'}
+      </div>
     </div>
   )
 }
