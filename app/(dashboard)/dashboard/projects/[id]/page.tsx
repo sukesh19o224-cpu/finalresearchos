@@ -12,7 +12,10 @@ import { DataTable } from '@/components/analysis/DataTable'
 import { DatasetStats } from '@/components/analysis/DatasetStats'
 import { AIChat } from '@/components/ai/AIChat'
 import { FileManager } from '@/components/files/FileManager'
-import { Database, FileText, BarChart3, Upload, Trash2, FolderOpen } from 'lucide-react'
+import { CollaborationPanel } from '@/components/collaboration/CollaborationPanel'
+import { LabNotebook } from '@/components/notebook/LabNotebook'
+import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
+import { Database, FileText, BarChart3, Upload, Trash2, FolderOpen, Users, BookOpen, Target } from 'lucide-react'
 import { formatDate, formatFileSize } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -148,8 +151,20 @@ export default function ProjectDetailPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="timeline">
+            <Target className="h-4 w-4 mr-2" />
+            Timeline
+          </TabsTrigger>
+          <TabsTrigger value="notebook">
+            <BookOpen className="h-4 w-4 mr-2" />
+            Lab Notebook
+          </TabsTrigger>
+          <TabsTrigger value="collaboration">
+            <Users className="h-4 w-4 mr-2" />
+            Team
+          </TabsTrigger>
           <TabsTrigger value="files">
             <FolderOpen className="h-4 w-4 mr-2" />
             Files
@@ -235,6 +250,21 @@ export default function ProjectDetailPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* Timeline Tab */}
+        <TabsContent value="timeline">
+          <ProjectTimeline projectId={projectId} />
+        </TabsContent>
+
+        {/* Lab Notebook Tab */}
+        <TabsContent value="notebook">
+          <LabNotebook projectId={projectId} />
+        </TabsContent>
+
+        {/* Collaboration Tab */}
+        <TabsContent value="collaboration">
+          <CollaborationPanel projectId={projectId} />
         </TabsContent>
 
         {/* Files Tab */}
