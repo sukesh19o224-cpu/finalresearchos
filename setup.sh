@@ -1,195 +1,146 @@
 #!/bin/bash
 
-# ElctrDc Setup Script
-# This script sets up the complete ElctrDc environment
-
-set -e  # Exit on error
-
-echo "======================================"
-echo "  ElctrDc Setup Script"
-echo "======================================"
+echo "🚀 ElctrDc Complete Setup Script"
+echo "================================"
 echo ""
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Function to print colored output
-print_success() {
-    echo -e "${GREEN}✓ $1${NC}"
+print_status() {
+    echo -e "${GREEN}✓${NC} $1"
 }
 
 print_error() {
-    echo -e "${RED}✗ $1${NC}"
+    echo -e "${RED}✗${NC} $1"
 }
 
-print_info() {
-    echo -e "${YELLOW}→ $1${NC}"
+print_warning() {
+    echo -e "${YELLOW}!${NC} $1"
 }
 
-# Check if Node.js is installed
-print_info "Checking Node.js installation..."
-if ! command -v node &> /dev/null; then
-    print_error "Node.js is not installed"
-    echo "Please install Node.js 20+ from https://nodejs.org/"
+if [ ! -f "package.json" ]; then
+    print_error "Please run this script from the ElctrDC project directory"
     exit 1
 fi
 
-NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-if [ "$NODE_VERSION" -lt 20 ]; then
-    print_error "Node.js version 20+ is required (you have $(node -v))"
-    exit 1
-fi
-print_success "Node.js $(node -v) found"
+echo "Step 1: Cleaning old installation..."
+killall node 2>/dev/null || true
+rm -rf .next
+rm -rf node_modules/.cache
+rm -rf node_modules/.prisma
+print_status "Cleaned old build files"
 
-# Check if pnpm is installed
-print_info "Checking pnpm installation..."
-if ! command -v pnpm &> /dev/null; then
-    print_info "pnpm not found. Installing pnpm..."
-    npm install -g pnpm
-    print_success "pnpm installed"
-else
-    print_success "pnpm $(pnpm -v) found"
-fi
-
-# Check if PostgreSQL is available
-print_info "Checking PostgreSQL..."
+echo ""
+echo "Step 2: Checking PostgreSQL..."
 if ! command -v psql &> /dev/null; then
-    print_error "PostgreSQL not found on PATH"
-    echo ""
-    echo "PostgreSQL options:"
-    echo "1. Install locally: https://www.postgresql.org/download/"
-    echo "2. Use Docker: docker run --name elctrdc-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:16"
-    echo "3. Use cloud service: Neon, Supabase, AWS RDS"
-    echo ""
-    read -p "Do you want to continue without local PostgreSQL? (y/n) " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
+    print_error "PostgreSQL not found. Installing..."
+    sudo apt update
+    sudo apt install -y postgresql postgresql-contrib
+    sudo systemctl start postgresql
+    sudo systemctl enable postgresql
+fi
+
+if ! sudo systemctl is-active --quiet postgresql; then
+    print_warning "Starting PostgreSQL..."
+    sudo systemctl start postgresql
+fi
+print_status "PostgreSQL is running"
+
+echo ""
+echo "Step 3: Configuring PostgreSQL authentication..."
+PG_VERSION=$(ls /etc/postgresql/ 2>/dev/null | head -n 1)
+
+if [ -n "$PG_VERSION" ]; then
+    PG_HBA="/etc/postgresql/$PG_VERSION/main/pg_hba.conf"
+    sudo cp "$PG_HBA" "$PG_HBA.backup" 2>/dev/null || true
+    sudo sed -i 's/local\s\+all\s\+all\s\+peer/local   all             all                                     md5/g' "$PG_HBA"
+    sudo sed -i 's/host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+scram-sha-256/host    all             all             127.0.0.1\/32            md5/g' "$PG_HBA"
+    sudo systemctl restart postgresql
+    sleep 2
+    print_status "PostgreSQL authentication configured"
 else
-    print_success "PostgreSQL found"
+    print_warning "Could not find PostgreSQL config, using host-based connection"
 fi
 
-# Check if Ollama is installed
-print_info "Checking Ollama installation..."
-if ! command -v ollama &> /dev/null; then
-    print_error "Ollama not found"
-    echo ""
-    echo "Ollama is required for AI features."
-    echo "Install from: https://ollama.com/download"
-    echo ""
-    echo "After installing Ollama, run:"
-    echo "  ollama pull llama3.1:8b"
-    echo "  ollama pull mistral:7b"
-    echo ""
-    read -p "Do you want to continue without Ollama? (y/n) " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
+echo ""
+echo "Step 4: Setting up database..."
+sudo -u postgres psql << 'SQL'
+DROP DATABASE IF EXISTS elctrdc;
+DROP USER IF EXISTS elctrdc_user;
+CREATE DATABASE elctrdc;
+CREATE USER elctrdc_user WITH PASSWORD 'elctrdc123';
+ALTER USER elctrdc_user WITH SUPERUSER;
+GRANT ALL PRIVILEGES ON DATABASE elctrdc TO elctrdc_user;
+\c elctrdc
+GRANT ALL ON SCHEMA public TO elctrdc_user;
+SQL
+
+if [ $? -eq 0 ]; then
+    print_status "Database created successfully"
 else
-    print_success "Ollama found"
-
-    # Check if required models are available
-    print_info "Checking Ollama models..."
-    if ollama list | grep -q "llama3.1"; then
-        print_success "llama3.1 model found"
-    else
-        print_info "Pulling llama3.1:8b model (this may take a while)..."
-        ollama pull llama3.1:8b
-        print_success "llama3.1:8b model installed"
-    fi
+    print_error "Database creation failed"
+    exit 1
 fi
 
-# Install dependencies
 echo ""
-print_info "Installing Node.js dependencies..."
-pnpm install
-print_success "Dependencies installed"
+echo "Step 5: Creating environment files..."
+cat > .env << 'ENV'
+DATABASE_URL="postgresql://elctrdc_user:elctrdc123@127.0.0.1:5432/elctrdc"
+NEXTAUTH_SECRET="elctrdc-secret-key-change-in-production-minimum-32-characters"
+NEXTAUTH_URL="http://localhost:3000"
+ENV
 
-# Setup environment variables
+cp .env .env.local
+print_status "Environment files created"
+
 echo ""
-if [ ! -f .env ]; then
-    print_info "Creating .env file from template..."
-    cp .env.example .env
+echo "Step 6: Installing dependencies..."
+export NPM_CONFIG_CACHE="$(pwd)/.npm-cache"
+mkdir -p .npm-cache
 
-    # Generate a random JWT secret
-    JWT_SECRET=$(openssl rand -base64 32 2>/dev/null || echo "CHANGE-THIS-SECRET-$(date +%s)")
+npm install --legacy-peer-deps
 
-    # Update .env with generated secret
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        sed -i '' "s/your-super-secret-jwt-key-change-this-in-production/$JWT_SECRET/" .env
-    else
-        # Linux
-        sed -i "s/your-super-secret-jwt-key-change-this-in-production/$JWT_SECRET/" .env
-    fi
-
-    print_success ".env file created"
-    echo ""
-    print_info "Please configure your .env file with:"
-    echo "  - DATABASE_URL (PostgreSQL connection string)"
-    echo "  - BLOB_READ_WRITE_TOKEN (for file storage, if using Vercel Blob)"
-    echo ""
-    echo "Example DATABASE_URL:"
-    echo "  postgresql://user:password@localhost:5432/elctrdc"
-    echo ""
+if [ $? -eq 0 ]; then
+    print_status "Dependencies installed"
 else
-    print_success ".env file already exists"
+    print_error "Dependency installation failed"
+    exit 1
 fi
 
-# Setup database
 echo ""
-read -p "Do you want to setup the database now? (y/n) " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    print_info "Setting up database..."
+echo "Step 7: Setting up database schema..."
+npx prisma generate
+npx prisma db push --force-reset --skip-generate
 
-    # Check if DATABASE_URL is set
-    if grep -q "postgresql://" .env; then
-        pnpm prisma generate
-        print_success "Prisma client generated"
-
-        pnpm prisma db push
-        print_success "Database schema created"
-    else
-        print_error "DATABASE_URL not configured in .env"
-        echo "Please set your DATABASE_URL in .env and run: pnpm prisma db push"
-    fi
+if [ $? -eq 0 ]; then
+    print_status "Database schema created"
+else
+    print_error "Database schema creation failed"
+    exit 1
 fi
 
-# Create uploads directory
 echo ""
-print_info "Creating uploads directory..."
-mkdir -p public/uploads
-print_success "Uploads directory created"
+echo "Step 8: Verifying installation..."
+TABLE_COUNT=$(psql -h 127.0.0.1 -U elctrdc_user -d elctrdc -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null || echo "0")
 
-# Final instructions
+if [ "$TABLE_COUNT" -gt 0 ]; then
+    print_status "Found $TABLE_COUNT database tables"
+else
+    print_warning "Could not verify database tables"
+fi
+
 echo ""
-echo "======================================"
-print_success "Setup complete!"
-echo "======================================"
+echo "=========================================="
+echo -e "${GREEN}✓ Setup Complete!${NC}"
+echo "=========================================="
 echo ""
-echo "Next steps:"
+echo "To start the application, run:"
+echo "  ./run.sh"
 echo ""
-echo "1. Configure your .env file (if not done already):"
-echo "   - Set DATABASE_URL to your PostgreSQL connection"
-echo "   - (Optional) Set BLOB_READ_WRITE_TOKEN for cloud storage"
-echo ""
-echo "2. Setup the database (if not done already):"
-echo "   pnpm prisma db push"
-echo ""
-echo "3. Start the development server:"
-echo "   ./run.sh"
-echo "   or: pnpm dev"
-echo ""
-echo "4. Make sure Ollama is running:"
-echo "   ollama serve"
-echo ""
-echo "5. Open http://localhost:3000 in your browser"
-echo ""
-echo "======================================"
+echo "Then open your browser to:"
+echo "  http://localhost:3000"
 echo ""
