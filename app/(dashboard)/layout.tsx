@@ -10,6 +10,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { KeyboardShortcutsModal } from '@/components/shared/KeyboardShortcutsModal'
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
+import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts'
 
 export default function DashboardLayout({
@@ -79,7 +80,10 @@ export default function DashboardLayout({
             <Zap className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">ElctrDc</span>
           </Link>
-          <ThemeToggle />
+          <div className="flex items-center space-x-1">
+            <NotificationCenter />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Navigation */}
