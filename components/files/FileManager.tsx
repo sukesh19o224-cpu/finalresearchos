@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -83,7 +83,9 @@ export function FileManager({ projectId }: FileManagerProps) {
   const [newFolderName, setNewFolderName] = useState('')
   const [uploading, setUploading] = useState(false)
   const [previewFile, setPreviewFile] = useState<FileNode | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState<number>(0)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
   // Get current folder based on path
@@ -181,17 +183,70 @@ export function FileManager({ projectId }: FileManagerProps) {
 
   const openFolder = (itemIndex: number) => {
     setCurrentPath([...currentPath, itemIndex])
+    setSelectedIndex(0) // Reset selection when entering folder
   }
 
   const goBack = () => {
     if (currentPath.length > 0) {
       setCurrentPath(currentPath.slice(0, -1))
+      setSelectedIndex(0)
     }
   }
 
   const goToRoot = () => {
     setCurrentPath([])
+    setSelectedIndex(0)
   }
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't handle keys if creating folder or modal is open
+      if (isCreatingFolder || previewFile) return
+
+      const items = getCurrentFolder()
+      if (items.length === 0) return
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setSelectedIndex((prev) => Math.min(prev + 1, items.length - 1))
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setSelectedIndex((prev) => Math.max(prev - 1, 0))
+          break
+        case 'ArrowRight':
+        case 'Enter':
+          e.preventDefault()
+          const item = items[selectedIndex]
+          if (item) {
+            if (item.type === 'folder') {
+              openFolder(selectedIndex)
+            } else {
+              openFile(item)
+            }
+          }
+          break
+        case 'ArrowLeft':
+        case 'Backspace':
+          e.preventDefault()
+          goBack()
+          break
+      }
+    }
+
+    // Focus container to receive keyboard events
+    containerRef.current?.focus()
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedIndex, currentPath, isCreatingFolder, previewFile])
+
+  // Reset selection when path changes
+  useEffect(() => {
+    setSelectedIndex(0)
+  }, [currentPath.length])
 
   const formatFileSize = (bytes?: number): string => {
     if (!bytes) return '0 B'
@@ -393,7 +448,12 @@ export function FileManager({ projectId }: FileManagerProps) {
   }
 
   return (
-    <div className="relative h-[600px] border rounded-lg overflow-hidden bg-white">
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      className="relative h-[600px] border rounded-lg overflow-hidden bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      onClick={() => containerRef.current?.focus()}
+    >
       {renderFilePreview()}
       {/* Toolbar */}
       <div className="p-3 border-b flex items-center justify-between bg-gray-50">
@@ -499,8 +559,12 @@ export function FileManager({ projectId }: FileManagerProps) {
                 return (
                   <div
                     key={item.id}
-                    className="flex items-center p-3 rounded hover:bg-gray-100 cursor-pointer group"
-                    onDoubleClick={() => {
+                    className={`flex items-center p-3 rounded hover:bg-gray-100 cursor-pointer group select-none ${
+                      selectedIndex === index ? 'bg-blue-100 border-2 border-blue-500' : ''
+                    }`}
+                    onClick={() => setSelectedIndex(index)}
+                    onDoubleClick={(e) => {
+                      e.preventDefault()
                       if (item.type === 'folder') {
                         openFolder(index)
                       } else {
@@ -572,8 +636,13 @@ export function FileManager({ projectId }: FileManagerProps) {
       </ScrollArea>
 
       {/* Status Bar */}
-      <div className="absolute bottom-0 left-0 right-0 p-2 border-t bg-gray-50 text-xs text-gray-600">
-        {currentItems.length} {currentItems.length === 1 ? 'item' : 'items'}
+      <div className="absolute bottom-0 left-0 right-0 p-2 border-t bg-gray-50 text-xs text-gray-600 flex items-center justify-between">
+        <span>
+          {currentItems.length} {currentItems.length === 1 ? 'item' : 'items'}
+        </span>
+        <span className="text-gray-500">
+          Use ↑↓ to navigate • Enter to open • ← to go back
+        </span>
       </div>
     </div>
   )
