@@ -33,32 +33,10 @@ export function PlotControls({
   const { toast } = useToast()
 
   const exportPlot = async (format: 'png' | 'svg' | 'jpeg') => {
-    if (!plotRef.current) return
-
-    try {
-      const Plotly = await import('plotly.js-dist-min')
-
-      const opts = {
-        format,
-        width: format === 'svg' ? undefined : 1200,
-        height: format === 'svg' ? undefined : 800,
-        filename: `${plotName.replace(/\s+/g, '_').toLowerCase()}_${Date.now()}`,
-      }
-
-      await Plotly.downloadImage(plotRef.current, opts)
-
-      toast({
-        variant: 'success',
-        title: 'Export successful!',
-        description: `Plot exported as ${format.toUpperCase()}`,
-      })
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Export failed',
-        description: 'Could not export the plot',
-      })
-    }
+    toast({
+      title: 'Use plot toolbar',
+      description: 'Hover over the plot and click the camera icon in the toolbar to download',
+    })
   }
 
   const toggleFullscreen = () => {

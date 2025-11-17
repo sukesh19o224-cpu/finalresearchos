@@ -57,3 +57,14 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# npm cache
+.npm-cache/
+
+# Test data
+test-*.csv

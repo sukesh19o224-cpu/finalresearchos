@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
 const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'default-secret-change-in-production'
+  process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || 'default-secret-change-in-production'
 )
 
 export async function hashPassword(password: string): Promise<string> {
