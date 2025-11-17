@@ -56,17 +56,8 @@ const statusColors = {
 }
 
 export function CollaborationHub({ projectId }: { projectId: string }) {
-  const [collaborators, setCollaborators] = useState<Collaborator[]>([
-    {
-      id: '1',
-      name: 'You',
-      email: 'you@example.com',
-      role: 'owner' as const,
-      status: 'active' as const,
-      joinedAt: '2024-01-01',
-      lastActive: 'Now',
-    },
-  ])
+  // TODO: Fetch collaborators from API based on projectId
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([])
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'editor' | 'viewer'>('viewer')
   const [isInviting, setIsInviting] = useState(false)
@@ -135,7 +126,7 @@ export function CollaborationHub({ projectId }: { projectId: string }) {
                   <label className="text-sm font-medium mb-2 block">Email Address</label>
                   <Input
                     type="email"
-                    placeholder="colleague@university.edu"
+                    placeholder="Enter email address"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
@@ -194,8 +185,17 @@ export function CollaborationHub({ projectId }: { projectId: string }) {
       </CardHeader>
 
       <CardContent>
-        <div className="space-y-3">
-          {collaborators.map(collaborator => {
+        {collaborators.length === 0 ? (
+          <div className="py-12 text-center">
+            <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-sm">No collaborators yet</p>
+            <p className="text-gray-400 text-xs mt-1">
+              Click "Invite" to add team members to this project
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {collaborators.map(collaborator => {
             const RoleIcon = roleIcons[collaborator.role]
             const isOwner = collaborator.role === 'owner'
 
@@ -254,32 +254,34 @@ export function CollaborationHub({ projectId }: { projectId: string }) {
           })}
         </div>
 
-        {/* Pending invitations */}
-        {collaborators.some(c => c.status === 'pending') && (
-          <div className="mt-6 pt-6 border-t">
-            <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Pending Invitations
-            </h4>
-            <div className="space-y-2">
-              {collaborators
-                .filter(c => c.status === 'pending')
-                .map(collaborator => (
-                  <div
-                    key={collaborator.id}
-                    className="flex items-center justify-between p-3 bg-orange-50 rounded-lg"
-                  >
-                    <div>
-                      <p className="font-medium text-sm">{collaborator.email}</p>
-                      <p className="text-xs text-gray-600">Invitation sent</p>
+          {/* Pending invitations */}
+          {collaborators.some(c => c.status === 'pending') && (
+            <div className="mt-6 pt-6 border-t">
+              <h4 className="text-sm font-medium mb-3 flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Pending Invitations
+              </h4>
+              <div className="space-y-2">
+                {collaborators
+                  .filter(c => c.status === 'pending')
+                  .map(collaborator => (
+                    <div
+                      key={collaborator.id}
+                      className="flex items-center justify-between p-3 bg-orange-50 rounded-lg"
+                    >
+                      <div>
+                        <p className="font-medium text-sm">{collaborator.email}</p>
+                        <p className="text-xs text-gray-600">Invitation sent</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        Resend
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      Resend
-                    </Button>
-                  </div>
-                ))}
+                  ))}
+              </div>
             </div>
-          </div>
+          )}
+        </div>
         )}
       </CardContent>
     </Card>
