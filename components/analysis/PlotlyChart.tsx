@@ -14,7 +14,7 @@ export function PlotlyChart({ config, className = '' }: PlotlyChartProps) {
     if (!plotRef.current) return
 
     // Dynamically import Plotly to avoid SSR issues
-    import('plotly.js-dist-min').then((Plotly) => {
+    import('plotly.js').then((Plotly) => {
       if (!plotRef.current) return
 
       const data = config.data
@@ -50,7 +50,7 @@ export function PlotlyChart({ config, className = '' }: PlotlyChartProps) {
 
     return () => {
       if (plotRef.current) {
-        import('plotly.js-dist-min').then((Plotly) => {
+        import('plotly.js').then((Plotly) => {
           if (plotRef.current) {
             Plotly.purge(plotRef.current)
           }

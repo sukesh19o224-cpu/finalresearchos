@@ -36,7 +36,7 @@ export function PlotControls({
     if (!plotRef.current) return
 
     try {
-      const Plotly = await import('plotly.js-dist-min')
+      const Plotly = await import('plotly.js')
 
       const opts = {
         format,
