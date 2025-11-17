@@ -62,7 +62,7 @@ export function BatchOperations({
         <div className="flex items-center gap-4">
           <Checkbox
             checked={selectedItems.length === totalItems}
-            onCheckedChange={(checked) => onSelectAll(!!checked)}
+            onCheckedChange={(checked: boolean) => onSelectAll(!!checked)}
           />
           <div>
             <p className="font-medium">
@@ -170,7 +170,7 @@ export function SelectableItem({
       <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
         <Checkbox
           checked={isSelected}
-          onCheckedChange={(checked) => onSelectionChange(id, !!checked)}
+          onCheckedChange={(checked: boolean) => onSelectionChange(id, !!checked)}
           className="bg-white shadow-lg"
         />
       </div>
