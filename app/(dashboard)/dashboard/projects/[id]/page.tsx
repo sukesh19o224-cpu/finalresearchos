@@ -15,7 +15,12 @@ import { FileManager } from '@/components/files/FileManager'
 import { CollaborationPanel } from '@/components/collaboration/CollaborationPanel'
 import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { ProjectTimeline } from '@/components/timeline/ProjectTimeline'
-import { Database, FileText, BarChart3, Upload, Trash2, FolderOpen, Users, BookOpen, Target } from 'lucide-react'
+import { ExportPanel } from '@/components/export/ExportPanel'
+import { LiteratureManager } from '@/components/literature/LiteratureManager'
+import { AdvancedAnalytics } from '@/components/analytics/AdvancedAnalytics'
+import { MLPredictions } from '@/components/ml/MLPredictions'
+import { DataVersionControl } from '@/components/versioning/DataVersionControl'
+import { Database, FileText, BarChart3, Upload, Trash2, FolderOpen, Users, BookOpen, Target, Download, Brain, TrendingUp, GitBranch } from 'lucide-react'
 import { formatDate, formatFileSize } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -165,6 +170,26 @@ export default function ProjectDetailPage() {
             <Users className="h-4 w-4 mr-2" />
             Team
           </TabsTrigger>
+          <TabsTrigger value="literature">
+            <FileText className="h-4 w-4 mr-2" />
+            Literature
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="ml">
+            <Brain className="h-4 w-4 mr-2" />
+            ML Insights
+          </TabsTrigger>
+          <TabsTrigger value="versions">
+            <GitBranch className="h-4 w-4 mr-2" />
+            Versions
+          </TabsTrigger>
+          <TabsTrigger value="export">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </TabsTrigger>
           <TabsTrigger value="files">
             <FolderOpen className="h-4 w-4 mr-2" />
             Files
@@ -265,6 +290,31 @@ export default function ProjectDetailPage() {
         {/* Collaboration Tab */}
         <TabsContent value="collaboration">
           <CollaborationPanel projectId={projectId} />
+        </TabsContent>
+
+        {/* Literature Tab */}
+        <TabsContent value="literature">
+          <LiteratureManager projectId={projectId} />
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics">
+          <AdvancedAnalytics projectId={projectId} datasets={project.datasets} />
+        </TabsContent>
+
+        {/* ML Predictions Tab */}
+        <TabsContent value="ml">
+          <MLPredictions projectId={projectId} />
+        </TabsContent>
+
+        {/* Version Control Tab */}
+        <TabsContent value="versions">
+          <DataVersionControl projectId={projectId} />
+        </TabsContent>
+
+        {/* Export Tab */}
+        <TabsContent value="export">
+          <ExportPanel projectId={projectId} projectTitle={project.title} />
         </TabsContent>
 
         {/* Files Tab */}
