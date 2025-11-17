@@ -4,14 +4,17 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { FolderOpen, PlusCircle, FileText, Database, Zap } from 'lucide-react'
+import { FolderOpen, PlusCircle, FileText, Database, Zap, AlertCircle } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { Analytics } from '@/components/dashboard/Analytics'
 import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import { ProjectCardSkeleton } from '@/components/ui/skeleton'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchProjects()
@@ -19,18 +22,26 @@ export default function DashboardPage() {
 
   const fetchProjects = async () => {
     try {
+      setError(null)
       const res = await fetch('/api/projects')
+
+      if (!res.ok) {
+        throw new Error('Failed to fetch projects')
+      }
+
       const data = await res.json()
       setProjects(data.projects || [])
     } catch (error) {
       console.error('Failed to fetch projects:', error)
+      setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="p-8">
+    <ErrorBoundary>
+      <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Welcome to ElctrDc</h1>
@@ -105,10 +116,24 @@ export default function DashboardPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-            <p className="mt-4 text-gray-600">Loading projects...</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ProjectCardSkeleton />
+            <ProjectCardSkeleton />
+            <ProjectCardSkeleton />
           </div>
+        ) : error ? (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="py-12 text-center">
+              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-red-900">Failed to load projects</h3>
+              <p className="text-red-700 mb-4">{error}</p>
+              <Button onClick={fetchProjects} variant="outline">
+                Try Again
+              </Button>
+            </CardContent>
+          </Card>
         ) : projects.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
@@ -157,6 +182,7 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }

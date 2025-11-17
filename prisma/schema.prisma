@@ -42,6 +42,14 @@ model Project {
   papers        Paper[]
   workflows     Workflow[]
   visualizations Visualization[]
+  milestones    Milestone[]
+  labNotebookEntries LabNotebookEntry[]
+  collaborators Collaborator[]
+  comments      Comment[]
+  dataVersions  DataVersion[]
+  mlModels      MLModel[]
+  predictions   Prediction[]
+  exportRecords ExportRecord[]
 
   @@index([userId])
   @@index([status])
@@ -193,4 +201,163 @@ model AIConversation {
   @@index([userId])
   @@index([projectId])
   @@map("ai_conversations")
+}
+
+model Milestone {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  title         String
+  description   String?  @db.Text
+  dueDate       DateTime @map("due_date")
+  completed     Boolean  @default(false)
+  completedAt   DateTime? @map("completed_at")
+  progress      Int      @default(0) // 0-100
+  position      Int
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("milestones")
+}
+
+model LabNotebookEntry {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  title         String
+  content       String   @db.Text
+  tags          String[]
+  locked        Boolean  @default(false)
+  author        String
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("lab_notebook_entries")
+}
+
+model Collaborator {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  userId        String?  @map("user_id") // null if invited but not registered
+  email         String
+  name          String
+  role          String   @default("viewer") // owner, editor, viewer
+  status        String   @default("pending") // pending, active, inactive
+  invitedAt     DateTime @default(now()) @map("invited_at")
+  joinedAt      DateTime? @map("joined_at")
+  lastActive    DateTime? @map("last_active")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([email])
+  @@map("collaborators")
+}
+
+model Comment {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  userId        String   @map("user_id")
+  userName      String   @map("user_name")
+  content       String   @db.Text
+  resolved      Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("comments")
+}
+
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  type          String   // success, warning, info, collaboration
+  title         String
+  message       String   @db.Text
+  read          Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
+}
+
+model DataVersion {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  version       String
+  message       String   @db.Text
+  author        String
+  tag           String?
+  changes       Json     // { added, modified, deleted }
+  datasets      String[] // List of dataset IDs
+  snapshot      Json?    // Full state snapshot
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("data_versions")
+}
+
+model MLModel {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  name          String
+  modelType     String   @map("model_type") // random_forest, neural_network, etc.
+  targetVariable String  @map("target_variable") // peak_current, resistance, etc.
+  accuracy      Float
+  trainedOn     DateTime @map("trained_on")
+  sampleCount   Int      @map("sample_count")
+  parameters    Json?    // Model hyperparameters
+  metrics       Json?    // Training metrics
+  status        String   @default("ready") // training, ready, deprecated
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  predictions   Prediction[]
+
+  @@index([projectId])
+  @@map("ml_models")
+}
+
+model Prediction {
+  id            String   @id @default(uuid())
+  modelId       String   @map("model_id")
+  projectId     String   @map("project_id")
+  parameter     String   // peak_current, resistance, etc.
+  predicted     Float
+  confidence    Float
+  rangeMin      Float    @map("range_min")
+  rangeMax      Float    @map("range_max")
+  unit          String
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  model         MLModel  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([modelId])
+  @@map("predictions")
+}
+
+model ExportRecord {
+  id            String   @id @default(uuid())
+  projectId     String   @map("project_id")
+  format        String   // pdf, png, svg, csv, json
+  fileName      String   @map("file_name")
+  fileUrl       String?  @map("file_url")
+  options       Json?    // Export options (include data, plots, etc.)
+  status        String   @default("completed") // pending, completed, failed
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("export_records")
 }

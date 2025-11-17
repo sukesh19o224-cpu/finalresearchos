@@ -5,11 +5,8 @@ import { parserRegistry } from '@/lib/parsers/parser-registry'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+// Route segment config for large file uploads
+export const maxDuration = 60 // Maximum duration in seconds
 
 export async function POST(
   request: NextRequest,
