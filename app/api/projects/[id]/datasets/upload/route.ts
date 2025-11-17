@@ -68,7 +68,7 @@ export async function POST(
     return NextResponse.json({
       dataset: {
         ...dataset,
-        fileSize: dataset.fileSize.toString(), // Convert BigInt to string for JSON
+        fileSize: dataset.fileSize?.toString() || null, // Convert BigInt to string for JSON
       }
     }, { status: 201 })
   } catch (error: any) {
