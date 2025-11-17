@@ -9,12 +9,14 @@ import { FavoritesManager, FavoriteItem } from '@/lib/favorites'
 import { useToast } from '@/components/ui/use-toast'
 import { EmptyState } from '@/components/shared/EmptyState'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([])
   const [activeTab, setActiveTab] = useState<'all' | 'projects' | 'datasets'>('all')
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     loadFavorites()
@@ -155,7 +157,7 @@ export default function FavoritesPage() {
               description="Star projects and datasets to add them to your favorites for quick access"
               action={{
                 label: 'Browse Projects',
-                href: '/dashboard/projects',
+                onClick: () => router.push('/dashboard/projects'),
               }}
             />
           ) : (
