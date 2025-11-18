@@ -1,0 +1,29 @@
+name: Auto Merge Claude Branch to Main
+
+on:
+  push:
+    branches:
+      - 'claude/resume-session-01Rtx7a3cdwFdLW83tvwhrib'
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+
+      - name: Merge to main
+        run: |
+          git fetch origin
+          git checkout main
+          git merge origin/claude/resume-session-01Rtx7a3cdwFdLW83tvwhrib --no-edit -m "Auto-merge: Deploy claude branch to production"
+          git push origin main
