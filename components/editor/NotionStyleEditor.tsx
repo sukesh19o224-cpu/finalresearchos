@@ -118,7 +118,7 @@ export function NotionStyleEditor() {
 
       {/* Footer */}
       <div className="p-2 border-t bg-gray-50 text-xs text-gray-600">
-        <p>Supports Markdown: **bold**, *italic*, # headings, - lists, > quotes, `code`</p>
+        <p>Supports Markdown: **bold**, *italic*, # headings, - lists, &gt; quotes, `code`</p>
       </div>
     </div>
   )

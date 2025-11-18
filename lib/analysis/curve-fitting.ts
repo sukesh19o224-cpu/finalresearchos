@@ -1,5 +1,5 @@
 import * as ss from 'simple-statistics'
-import { linearRegression, polynomialRegression } from 'regression'
+import { linear, polynomial } from 'regression'
 
 export interface FitResult {
   type: string
@@ -33,8 +33,8 @@ export interface PeakResult {
  * Linear regression: y = mx + b
  */
 export function fitLinear(xData: number[], yData: number[]): FitResult {
-  const points = xData.map((x, i) => [x, yData[i]])
-  const result = linearRegression(points)
+  const points = xData.map((x, i) => [x, yData[i]] as [number, number])
+  const result = linear(points)
 
   const predictions = xData.map((x) => result.predict(x)[1])
   const r2 = calculateR2(yData, predictions)
@@ -56,8 +56,8 @@ export function fitPolynomial(
   yData: number[],
   order: number = 2
 ): FitResult {
-  const points = xData.map((x, i) => [x, yData[i]])
-  const result = polynomialRegression(points, order)
+  const points = xData.map((x, i) => [x, yData[i]] as [number, number])
+  const result = polynomial(points, { order })
 
   const predictions = xData.map((x) => result.predict(x)[1])
   const r2 = calculateR2(yData, predictions)
@@ -87,8 +87,8 @@ export function fitPolynomial(
 export function fitExponential(xData: number[], yData: number[]): FitResult {
   // Convert to linear by taking log
   const logY = yData.map((y) => Math.log(Math.abs(y)))
-  const points = xData.map((x, i) => [x, logY[i]])
-  const result = linearRegression(points)
+  const points = xData.map((x, i) => [x, logY[i]] as [number, number])
+  const result = linear(points)
 
   const a = Math.exp(result.equation[1])
   const b = result.equation[0]
@@ -111,8 +111,8 @@ export function fitExponential(xData: number[], yData: number[]): FitResult {
  */
 export function fitLogarithmic(xData: number[], yData: number[]): FitResult {
   const logX = xData.map((x) => Math.log(Math.abs(x)))
-  const points = logX.map((x, i) => [x, yData[i]])
-  const result = linearRegression(points)
+  const points = logX.map((x, i) => [x, yData[i]] as [number, number])
+  const result = linear(points)
 
   const a = result.equation[1]
   const b = result.equation[0]
@@ -136,8 +136,8 @@ export function fitLogarithmic(xData: number[], yData: number[]): FitResult {
 export function fitPower(xData: number[], yData: number[]): FitResult {
   const logX = xData.map((x) => Math.log(Math.abs(x)))
   const logY = yData.map((y) => Math.log(Math.abs(y)))
-  const points = logX.map((x, i) => [x, logY[i]])
-  const result = linearRegression(points)
+  const points = logX.map((x, i) => [x, logY[i]] as [number, number])
+  const result = linear(points)
 
   const a = Math.exp(result.equation[1])
   const b = result.equation[0]

@@ -54,7 +54,7 @@ export function SpreadsheetPreview({
           }
           setLoading(false)
         },
-        error: (err) => {
+        error: (err: Error) => {
           setError(err.message)
           setLoading(false)
         },

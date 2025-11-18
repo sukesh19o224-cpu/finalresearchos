@@ -15,15 +15,6 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];
 
-    // Optimize Plotly.js (HUGE bundle ~2MB)
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'plotly.js': 'plotly.js-dist-min',
-        'plotly.js/dist/plotly': 'plotly.js-dist-min',
-      };
-    }
-
     // Tree-shaking optimization
     config.optimization = {
       ...config.optimization,

@@ -169,12 +169,12 @@ export function PlotVisualization({
           ...plotData.layout,
           height: undefined,
           margin: { l: 50, r: 50, t: 50, b: 50 },
-        }}
+        } as any}
         config={{
           responsive: true,
           displayModeBar: true,
           displaylogo: false,
-        }}
+        } as any}
         style={{ width: '100%', height: '100%' }}
         useResizeHandler
       />

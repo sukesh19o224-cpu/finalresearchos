@@ -147,7 +147,7 @@ export function EdgeOptimizedEngine() {
               Edge-Optimized Computation Engine
             </CardTitle>
             <CardDescription>
-              $679B cloud + $274B edge market - Vercel Edge Functions for <50ms latency
+              $679B cloud + $274B edge market - Vercel Edge Functions for &lt;50ms latency
             </CardDescription>
           </div>
           <Badge variant="outline" className="bg-purple-50 text-purple-700">

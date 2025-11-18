@@ -185,7 +185,7 @@ export function AutomatedDataPipeline({ projectId }: { projectId: string }) {
               </div>
               <h3 className="text-lg font-semibold">Processing Your Data...</h3>
               <p className="text-sm text-gray-600 mt-1">
-                Validating and cleaning {15234.toLocaleString()} data points
+                Validating and cleaning {(15234).toLocaleString()} data points
               </p>
             </div>
             <Progress value={progress} className="h-3 mb-2" />

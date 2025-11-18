@@ -189,7 +189,7 @@ export function Plot3D({
     layout.yaxis = { title: yLabel }
   }
 
-  const config = {
+  const config: any = {
     displayModeBar: true,
     displaylogo: false,
     modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
