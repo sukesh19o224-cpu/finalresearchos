@@ -153,6 +153,91 @@ export const EdgeOptimizedEngine = dynamic(
 )
 
 // ============================================================================
+// BATCH 4: COMPLETE PLATFORM REDESIGN (AI-Powered Interface)
+// ============================================================================
+
+// Research AI Chat - Groq Llama 3.1 8B powered chat
+export const ResearchAIChat = dynamic(
+  () => import('@/components/ai/ResearchAIChat').then(mod => ({ default: mod.ResearchAIChat })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Redesigned Home Page - 3 main actions (Create, All Projects, AI Chat)
+export const RedesignedHome = dynamic(
+  () => import('@/components/home/RedesignedHome').then(mod => ({ default: mod.RedesignedHome })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Project Templates Modal - Template selection for new projects
+export const ProjectTemplatesModal = dynamic(
+  () => import('@/components/home/ProjectTemplatesModal').then(mod => ({ default: mod.ProjectTemplatesModal })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Notion-Style Editor - Markdown editor for Overview tab
+export const NotionStyleEditor = dynamic(
+  () => import('@/components/editor/NotionStyleEditor').then(mod => ({ default: mod.NotionStyleEditor })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Data Management Tab - Cloud storage with Vercel Blob
+export const DataManagementTab = dynamic(
+  () => import('@/components/data/DataManagementTab').then(mod => ({ default: mod.DataManagementTab })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Spreadsheet Preview - Excel-like popup with column selection
+export const SpreadsheetPreview = dynamic(
+  () => import('@/components/data/SpreadsheetPreview').then(mod => ({ default: mod.SpreadsheetPreview })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Visualization Tab - Split view with spreadsheet and plots
+export const VisualizationTab = dynamic(
+  () => import('@/components/visualization/VisualizationTab').then(mod => ({ default: mod.VisualizationTab })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// Plot Visualization - Plotly.js powered interactive plots
+export const PlotVisualization = dynamic(
+  () => import('@/components/visualization/PlotVisualization').then(mod => ({ default: mod.PlotVisualization })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// AI Insights Tab - AI-powered dataset analysis and insights
+export const AIInsightsTab = dynamic(
+  () => import('@/components/insights/AIInsightsTab').then(mod => ({ default: mod.AIInsightsTab })),
+  {
+    loading: () => <LoadingFallback />,
+    ssr: false,
+  }
+)
+
+// ============================================================================
 // EXISTING FEATURES (Previously built - lazy load for optimization)
 // ============================================================================
 
