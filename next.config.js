@@ -20,6 +20,7 @@ const nextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         'plotly.js': 'plotly.js-dist-min',
+        'plotly.js/dist/plotly': 'plotly.js-dist-min',
       };
     }
 
