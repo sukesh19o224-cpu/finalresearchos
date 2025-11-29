@@ -12,12 +12,10 @@ export class BioLogicMPTParser extends BaseParser {
       // .mpr files are binary format - for now, we'll return a placeholder
       // In production, you'd need a proper .mpr parser library
       return {
-        technique: 'Unknown (Binary .mpr)',
+        technique: 'CV' as const, // Default technique
         instrument: 'BioLogic',
         metadata: {
-          filename: file.name,
-          fileSize: file.size,
-          note: '.mpr files require binary parsing. Please convert to .mpt format or use BioLogic EC-Lab software to export as text.'
+          comments: `.mpr files require binary parsing. Please convert to .mpt format or use BioLogic EC-Lab software to export as text. File: ${file.name}, Size: ${file.size} bytes`
         },
         data: {
           columns: ['time', 'voltage', 'current'],
