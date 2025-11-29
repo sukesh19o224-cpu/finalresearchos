@@ -27,6 +27,15 @@ export async function POST(req: NextRequest) {
     const body = await req.json() as GroqChatRequest
     const { messages, context } = body
 
+    // Validate messages
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      console.error('Invalid messages:', messages)
+      return NextResponse.json(
+        { error: 'Messages array is required and must not be empty' },
+        { status: 400 }
+      )
+    }
+
     // Build context-aware system message
     let systemMessage = `You are an expert research assistant specializing in electrochemistry and scientific data analysis. You help researchers with:
 - Analyzing experimental data and plots
@@ -68,9 +77,14 @@ Always be concise, actionable, and scientifically accurate.`
 
     if (!response.ok) {
       const error = await response.text()
-      console.error('Groq API error:', error)
+      console.error('Groq API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error,
+        apiKey: GROQ_API_KEY ? 'SET' : 'NOT SET'
+      })
       return NextResponse.json(
-        { error: 'Failed to get response from AI' },
+        { error: `AI service error: ${response.statusText}` },
         { status: response.status }
       )
     }
@@ -81,10 +95,14 @@ Always be concise, actionable, and scientifically accurate.`
       message: data.choices[0]?.message?.content || 'No response',
       usage: data.usage,
     })
-  } catch (error) {
-    console.error('Chat API error:', error)
+  } catch (error: any) {
+    console.error('Chat API error:', {
+      message: error.message,
+      stack: error.stack,
+      error
+    })
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${error.message}` },
       { status: 500 }
     )
   }
