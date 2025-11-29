@@ -3,7 +3,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: "ElctrDc - Electrochemistry Research OS",
+  title: "ResearchOS - Electrochemistry Research Platform",
   description: "An all-in-one research platform for electrochemistry researchers",
 }
 

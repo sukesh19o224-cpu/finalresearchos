@@ -74,7 +74,7 @@ export function DataAuditTrail({ resourceId }: { resourceId?: string }) {
     {
       id: '3',
       timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      user: { name: 'System', email: 'system@elctrdc.com' },
+      user: { name: 'System', email: 'system@researchos.com' },
       action: 'create',
       resource: 'Backup_Daily_20241117',
       resourceType: 'dataset',

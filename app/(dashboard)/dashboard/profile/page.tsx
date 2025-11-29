@@ -207,7 +207,7 @@ export default function ProfilePage() {
                   <div>
                     <p className="font-medium">New Features</p>
                     <p className="text-sm text-gray-500">
-                      Updates about new ElctrDc features and improvements
+                      Updates about new ResearchOS features and improvements
                     </p>
                   </div>
                   <input type="checkbox" className="h-4 w-4" />

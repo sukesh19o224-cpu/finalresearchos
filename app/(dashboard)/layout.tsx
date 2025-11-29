@@ -78,7 +78,7 @@ export default function DashboardLayout({
         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center space-x-2">
             <Zap className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold">ElctrDc</span>
+            <span className="text-xl font-bold">ResearchOS</span>
           </Link>
           <div className="flex items-center space-x-1">
             <NotificationCenter />

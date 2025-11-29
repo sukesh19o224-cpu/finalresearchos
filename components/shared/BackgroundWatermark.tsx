@@ -11,7 +11,7 @@ interface BackgroundWatermarkProps {
 }
 
 export function BackgroundWatermark({
-  text = 'ElctrDc Research Platform',
+  text = 'ResearchOS Research Platform',
   opacity = 0.03,
   fontSize = 48,
   color = '#000000',

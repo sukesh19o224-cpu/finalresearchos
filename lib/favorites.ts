@@ -11,7 +11,7 @@ export interface FavoriteItem {
 }
 
 export class FavoritesManager {
-  private static STORAGE_KEY = 'elctrdc_favorites'
+  private static STORAGE_KEY = 'researchos_favorites'
 
   /**
    * Get all favorited items

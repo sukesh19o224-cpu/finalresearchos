@@ -3,7 +3,7 @@
 
 set -e
 
-echo "🚀 Deploying ElctrDc to main branch..."
+echo "🚀 Deploying ResearchOS to main branch..."
 echo ""
 
 # Fetch latest from remote

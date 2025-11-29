@@ -59,7 +59,7 @@ const templates: ProtocolTemplate[] = [
     steps: 5,
     usageCount: 1247,
     rating: 4.8,
-    author: 'ElctrDc Team',
+    author: 'ResearchOS Team',
     tags: ['CV', 'Quick', 'Standard'],
     parameters: [
       { name: 'Scan Rate', value: '100', unit: 'mV/s' },
@@ -99,7 +99,7 @@ const templates: ProtocolTemplate[] = [
     steps: 6,
     usageCount: 634,
     rating: 4.7,
-    author: 'ElctrDc Team',
+    author: 'ResearchOS Team',
     tags: ['EIS', 'Impedance', 'Full Range'],
     parameters: [
       { name: 'Frequency Range', value: '100kHz - 10mHz', unit: '' },

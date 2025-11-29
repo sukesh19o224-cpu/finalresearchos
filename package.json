@@ -1,7 +1,7 @@
 {
-  "name": "elctrdc",
+  "name": "researchos",
   "version": "1.0.0",
-  "description": "Electrochemistry Research OS - An all-in-one research platform for electrochemistry",
+  "description": "ResearchOS - An all-in-one research platform for electrochemistry",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

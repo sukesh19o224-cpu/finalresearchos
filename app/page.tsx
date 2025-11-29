@@ -17,7 +17,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <Zap className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold">ElctrDc</span>
+            <span className="text-xl font-bold">ResearchOS</span>
           </div>
           <div className="space-x-4">
             <Link href="/login">
@@ -186,7 +186,7 @@ export default function HomePage() {
           Ready to accelerate your research?
         </h2>
         <p className="text-xl text-gray-600 mb-8">
-          Join researchers using ElctrDc to organize, analyze, and publish faster.
+          Join researchers using ResearchOS to organize, analyze, and publish faster.
         </p>
         <Link href="/register">
           <Button size="lg">Get Started Free</Button>
@@ -196,7 +196,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t bg-gray-50 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>© 2024 ElctrDc. Built for electrochemistry researchers.</p>
+          <p>© 2024 ResearchOS. Built for electrochemistry researchers.</p>
         </div>
       </footer>
     </div>

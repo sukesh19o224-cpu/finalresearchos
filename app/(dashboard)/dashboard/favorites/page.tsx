@@ -55,7 +55,7 @@ export default function FavoritesPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `elctrdc-favorites-${new Date().toISOString().split('T')[0]}.json`
+    a.download = `researchos-favorites-${new Date().toISOString().split('T')[0]}.json`
     a.click()
     URL.revokeObjectURL(url)
 

@@ -298,7 +298,7 @@ export function SoftwareHub({ datasetId, fileName, filePath, fileType }: Softwar
               <div className="text-sm">
                 <p className="font-medium text-blue-900 mb-1">How this works</p>
                 <ul className="text-blue-700 space-y-1 text-xs">
-                  <li>• ElctrDc attempts to open the file in your chosen software</li>
+                  <li>• ResearchOS attempts to open the file in your chosen software</li>
                   <li>• The software must be installed on your computer</li>
                   <li>• If the software doesn't open, the file will be downloaded instead</li>
                   <li>• You can also directly export to common formats</li>

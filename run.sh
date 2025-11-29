@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Starting ElctrDc..."
+echo "🚀 Starting ResearchOS..."
 echo ""
 
 if [ ! -d "node_modules" ]; then

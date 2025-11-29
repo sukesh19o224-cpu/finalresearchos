@@ -24,7 +24,7 @@ interface TourStep {
 
 const tourSteps: TourStep[] = [
   {
-    title: 'Welcome to ElctrDc! 🎉',
+    title: 'Welcome to ResearchOS! 🎉',
     description: 'Your complete electrochemistry research operating system. Let\'s take a quick tour to get you started!',
     icon: <Rocket className="h-12 w-12 text-blue-600" />,
   },
@@ -61,7 +61,7 @@ export function OnboardingTour() {
 
   useEffect(() => {
     // Check if user has seen the tour
-    const hasSeenTour = localStorage.getItem('elctrdc_tour_completed')
+    const hasSeenTour = localStorage.getItem('researchos_tour_completed')
     if (!hasSeenTour) {
       // Show tour after a short delay
       setTimeout(() => setOpen(true), 1000)
@@ -83,12 +83,12 @@ export function OnboardingTour() {
   }
 
   const handleSkip = () => {
-    localStorage.setItem('elctrdc_tour_completed', 'true')
+    localStorage.setItem('researchos_tour_completed', 'true')
     setOpen(false)
   }
 
-  const handleComplete = () => {
-    localStorage.setItem('elctrdc_tour_completed', 'true')
+  const handleSkip = () => {
+    localStorage.setItem('researchos_tour_completed', 'true')
     setOpen(false)
   }
 

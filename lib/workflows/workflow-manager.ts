@@ -26,7 +26,7 @@ export interface WorkflowStep {
 }
 
 export class WorkflowManager {
-  private static STORAGE_KEY = 'elctrdc_workflows'
+  private static STORAGE_KEY = 'researchos_workflows'
 
   /**
    * Get all workflows

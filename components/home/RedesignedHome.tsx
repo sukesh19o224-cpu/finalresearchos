@@ -21,7 +21,7 @@ export function RedesignedHome() {
     <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">ElctrDc Research Platform</h1>
+        <h1 className="text-4xl font-bold mb-4">ResearchOS Research Platform</h1>
         <p className="text-xl text-gray-600 mb-8">
           AI-powered electrochemistry research management
         </p>

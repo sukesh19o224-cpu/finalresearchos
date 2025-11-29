@@ -49,7 +49,7 @@ export default function SettingsPage() {
   }
 
   const loadPreferences = () => {
-    const prefs = localStorage.getItem('elctrdc_preferences')
+    const prefs = localStorage.getItem('researchos_preferences')
     if (prefs) {
       const parsed = JSON.parse(prefs)
       setEmailNotifications(parsed.emailNotifications ?? true)
@@ -64,7 +64,7 @@ export default function SettingsPage() {
       dataBackup,
       autoSave,
     }
-    localStorage.setItem('elctrdc_preferences', JSON.stringify(prefs))
+    localStorage.setItem('researchos_preferences', JSON.stringify(prefs))
     toast({
       variant: 'success',
       title: 'Preferences saved',
@@ -73,7 +73,7 @@ export default function SettingsPage() {
   }
 
   const resetTour = () => {
-    localStorage.removeItem('elctrdc_tour_completed')
+    localStorage.removeItem('researchos_tour_completed')
     toast({
       title: 'Tour reset',
       description: 'The onboarding tour will show again on next page load.',
@@ -82,7 +82,7 @@ export default function SettingsPage() {
   }
 
   const clearCache = () => {
-    localStorage.removeItem('elctrdc_preferences')
+    localStorage.removeItem('researchos_preferences')
     toast({
       title: 'Cache cleared',
       description: 'All cached data has been removed.',
@@ -255,7 +255,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>Appearance Settings</CardTitle>
               <CardDescription>
-                Customize how ElctrDc looks
+                Customize how ResearchOS looks
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -327,7 +327,7 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">
-                ElctrDc stores all your research data securely. We never share your data with third parties.
+                ResearchOS stores all your research data securely. We never share your data with third parties.
                 All data transmission is encrypted, and your datasets are stored with enterprise-grade security.
               </p>
               <ul className="text-sm text-gray-600 space-y-2 list-disc list-inside">

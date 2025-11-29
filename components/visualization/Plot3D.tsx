@@ -195,7 +195,7 @@ export function Plot3D({
     modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
     toImageButtonOptions: {
       format: 'png',
-      filename: `elctrdc-3d-plot-${Date.now()}`,
+      filename: `researchos-3d-plot-${Date.now()}`,
       height: 1200,
       width: 1600,
       scale: 2,

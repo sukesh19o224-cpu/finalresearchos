@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 ElctrDc Complete Setup Script"
+echo "🚀 ResearchOS Complete Setup Script"
 echo "================================"
 echo ""
 
@@ -23,7 +23,7 @@ print_warning() {
 }
 
 if [ ! -f "package.json" ]; then
-    print_error "Please run this script from the ElctrDC project directory"
+    print_error "Please run this script from the ResearchOS project directory"
     exit 1
 fi
 
@@ -69,14 +69,14 @@ fi
 echo ""
 echo "Step 4: Setting up database..."
 sudo -u postgres psql << 'SQL'
-DROP DATABASE IF EXISTS elctrdc;
-DROP USER IF EXISTS elctrdc_user;
-CREATE DATABASE elctrdc;
-CREATE USER elctrdc_user WITH PASSWORD 'elctrdc123';
-ALTER USER elctrdc_user WITH SUPERUSER;
-GRANT ALL PRIVILEGES ON DATABASE elctrdc TO elctrdc_user;
-\c elctrdc
-GRANT ALL ON SCHEMA public TO elctrdc_user;
+DROP DATABASE IF EXISTS researchos;
+DROP USER IF EXISTS researchos_user;
+CREATE DATABASE researchos;
+CREATE USER researchos_user WITH PASSWORD 'researchos123';
+ALTER USER researchos_user WITH SUPERUSER;
+GRANT ALL PRIVILEGES ON DATABASE researchos TO researchos_user;
+\c researchos
+GRANT ALL ON SCHEMA public TO researchos_user;
 SQL
 
 if [ $? -eq 0 ]; then
@@ -89,8 +89,8 @@ fi
 echo ""
 echo "Step 5: Creating environment files..."
 cat > .env << 'ENV'
-DATABASE_URL="postgresql://elctrdc_user:elctrdc123@127.0.0.1:5432/elctrdc"
-NEXTAUTH_SECRET="elctrdc-secret-key-change-in-production-minimum-32-characters"
+DATABASE_URL="postgresql://researchos_user:researchos123@127.0.0.1:5432/researchos"
+NEXTAUTH_SECRET="researchos-secret-key-change-in-production-minimum-32-characters"
 NEXTAUTH_URL="http://localhost:3000"
 ENV
 
@@ -125,7 +125,7 @@ fi
 
 echo ""
 echo "Step 8: Verifying installation..."
-TABLE_COUNT=$(psql -h 127.0.0.1 -U elctrdc_user -d elctrdc -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null || echo "0")
+TABLE_COUNT=$(psql -h 127.0.0.1 -U researchos_user -d researchos -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null || echo "0")
 
 if [ "$TABLE_COUNT" -gt 0 ]; then
     print_status "Found $TABLE_COUNT database tables"

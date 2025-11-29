@@ -2,7 +2,7 @@
 REM Deploy script to merge claude branch to main and trigger Vercel deployment
 
 echo.
-echo 🚀 Deploying ElctrDc to main branch...
+echo 🚀 Deploying ResearchOS to main branch...
 echo.
 
 REM Fetch latest from remote

@@ -1,13 +1,13 @@
-# ElctrDc - Electrochemistry Research Platform
+# ResearchOS - Electrochemistry Research Platform
 
-![ElctrDc Banner](https://img.shields.io/badge/ElctrDc-Research%20Platform-blue?style=for-the-badge)
+![ResearchOS Banner](https://img.shields.io/badge/ResearchOS-Research%20Platform-blue?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-14.2.3-black?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-**ElctrDc** is a modern, full-stack web platform for electrochemistry research data management, visualization, and collaboration. Built with Next.js 14, it provides researchers with powerful tools to organize experiments, analyze data, and share findings with colleagues.
+**ResearchOS** is a modern, full-stack web platform for electrochemistry research data management, visualization, and collaboration. Built with Next.js 14, it provides researchers with powerful tools to organize experiments, analyze data, and share findings with colleagues.
 
-🌐 **Live Demo**: [https://elctr-dc.vercel.app](https://elctr-dc.vercel.app)
+🌐 **Live Demo**: [https://research-os.vercel.app](https://research-os.vercel.app)
 
 ---
 
@@ -67,8 +67,8 @@ Before you begin, ensure you have:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ElctrDc.git
-   cd ElctrDc
+   git clone https://github.com/yourusername/ResearchOS.git
+   cd ResearchOS
    ```
 
 2. **Install dependencies**
@@ -86,7 +86,7 @@ Before you begin, ensure you have:
    Update the `.env` file with your values:
    ```env
    # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/elctrdc"
+   DATABASE_URL="postgresql://user:password@localhost:5432/researchos"
 
    # Authentication
    NEXTAUTH_SECRET="your-secret-key-here"  # Generate with: openssl rand -base64 32
@@ -475,8 +475,8 @@ api: {
 
 ### FAQ
 
-**Q: Can I use ElctrDc offline?**
-A: Currently, ElctrDc requires an internet connection for full functionality. Offline support is planned for future releases.
+**Q: Can I use ResearchOS offline?**
+A: Currently, ResearchOS requires an internet connection for full functionality. Offline support is planned for future releases.
 
 **Q: How much data can I store?**
 A: Storage limits depend on your database provider. Neon free tier offers 0.5GB, paid plans scale up.
@@ -487,7 +487,7 @@ A: Yes! Use the batch export feature to download all datasets and visualizations
 **Q: Is my data secure?**
 A: Yes. Data is encrypted in transit (HTTPS) and at rest. We follow security best practices.
 
-**Q: Can I self-host ElctrDc?**
+**Q: Can I self-host ResearchOS?**
 A: Absolutely! Follow the deployment guide for your preferred platform.
 
 ---
@@ -560,8 +560,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: You're reading it!
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ElctrDc/issues)
-- **Email**: support@elctrdc.com
+- **Issues**: [GitHub Issues](https://github.com/yourusername/ResearchOS/issues)
+- **Email**: support@researchos.com
 
 ---
 

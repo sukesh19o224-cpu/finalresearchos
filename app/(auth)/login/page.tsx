@@ -49,7 +49,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Zap className="h-12 w-12 text-blue-600" />
           </div>
-          <CardTitle className="text-2xl">Welcome to ElctrDc</CardTitle>
+          <CardTitle className="text-2xl">Welcome to ResearchOS</CardTitle>
           <CardDescription>Sign in to your research workspace</CardDescription>
         </CardHeader>
         <CardContent>

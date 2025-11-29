@@ -26,7 +26,7 @@ export interface VersionDiff {
 }
 
 export class DataVersionManager {
-  private static STORAGE_KEY_PREFIX = 'elctrdc_versions_'
+  private static STORAGE_KEY_PREFIX = 'researchos_versions_'
 
   /**
    * Create new version

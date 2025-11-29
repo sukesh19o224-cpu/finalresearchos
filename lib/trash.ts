@@ -15,7 +15,7 @@ export interface TrashedItem {
 }
 
 export class TrashManager {
-  private static STORAGE_KEY = 'elctrdc_trash'
+  private static STORAGE_KEY = 'researchos_trash'
   private static RETENTION_DAYS = 30
 
   /**
