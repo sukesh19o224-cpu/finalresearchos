@@ -30,15 +30,13 @@ Before clicking "Deploy", you must add the following Environment Variables in th
 - Go to **Settings -> Environment Variables** in Vercel, update `NEXTAUTH_URL` to your actual Vercel domain, and **Redeploy**.
 
 ### ⚠️ Missing Variable: `BLOB_READ_WRITE_TOKEN`
-This token is required for file uploads (PDFs, images). You need to create your own free Blob store on Vercel:
+This token is required for file uploads (PDFs, images).
 
-1. Go to your Vercel Dashboard.
-2. Click the **"Storage"** tab at the top.
-3. Click **"Create Database"** -> Select **"Blob"** -> Click **"Continue"**.
-4. Give it a name (e.g., `elctrdc-blob`) and click **"Create"**.
-5. Once created, scroll down to **"Environment Variables"**.
-6. Copy the value for `BLOB_READ_WRITE_TOKEN` (starts with `vercel_blob_rw_...`).
-7. Go back to your Project Settings -> Environment Variables and add it there.
+| Variable Name | Value |
+|--------------|-------|
+| `BLOB_READ_WRITE_TOKEN` | `vercel_blob_rw_z5Pqwh55j92Yfljg_gSaywHbLjmcW0F1fG8qY1p4Y0YaGxK` |
+
+**Note:** By using this token, both you and Sukesh will share the same file storage. This is the easiest way to get started!
 
 ## Step 4: Deploy
 1. Click **"Deploy"**.
