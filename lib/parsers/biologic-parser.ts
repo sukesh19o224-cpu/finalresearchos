@@ -3,10 +3,31 @@ import type { ParsedData } from '@/types'
 
 export class BioLogicMPTParser extends BaseParser {
   canParse(file: File): boolean {
-    return file.name.endsWith('.mpt')
+    return file.name.endsWith('.mpt') || file.name.endsWith('.mpr')
   }
 
   async parse(file: File): Promise<ParsedData> {
+    // Check if it's a binary .mpr file
+    if (file.name.endsWith('.mpr')) {
+      // .mpr files are binary format - for now, we'll return a placeholder
+      // In production, you'd need a proper .mpr parser library
+      return {
+        technique: 'Unknown (Binary .mpr)',
+        instrument: 'BioLogic',
+        metadata: {
+          filename: file.name,
+          fileSize: file.size,
+          note: '.mpr files require binary parsing. Please convert to .mpt format or use BioLogic EC-Lab software to export as text.'
+        },
+        data: {
+          columns: ['time', 'voltage', 'current'],
+          rows: []
+        },
+        units: {}
+      }
+    }
+
+    // Parse .mpt text files
     const text = await file.text()
     const lines = text.split('\n')
 

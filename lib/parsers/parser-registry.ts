@@ -33,7 +33,8 @@ export class ParserRegistry {
 
   getSupportedFormats(): string[] {
     return [
-      '.mpt (BioLogic)',
+      '.mpt (BioLogic Text)',
+      '.mpr (BioLogic Binary)',
       '.dta (Gamry)',
       '.csv (Generic)',
       '.txt (Generic)',
