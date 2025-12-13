@@ -42,7 +42,7 @@ export default function HomePage() {
         </p>
         <div className="space-x-4">
           <Link href="/register">
-            <Button size="lg">Start Free Trial</Button>
+            <Button size="lg" className="bg-red-600 hover:bg-red-700">Start Free Trial</Button>
           </Link>
           <Link href="#features">
             <Button size="lg" variant="outline">
