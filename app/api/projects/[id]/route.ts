@@ -57,6 +57,9 @@ export async function GET(
           icon: '📋',
           position: 0,
           properties: {},
+        },
+        include: {
+          blocks: true
         }
       })
       project.pages = [overviewPage]
