@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export async function GET(
+    req: NextRequest,
+    { params }: { params: { noteId: string } }
+) {
+    try {
+        const { noteId } = params
+
+        // Fetch blocks for this page/note
+        const dbBlocks = await prisma.block.findMany({
+            where: { pageId: noteId },
+            orderBy: { position: 'asc' }
+        })
+
+        // Transform to frontend format
+        const blocks = dbBlocks.map(b => ({
+            id: b.id,
+            header: (b.content as any)?.header || 'Untitled',
+            content: (b.content as any)?.html || '',
+            order: b.position
+        }))
+
+        return NextResponse.json({ blocks })
+    } catch (error) {
+        console.error('Error loading blocks:', error)
+        return NextResponse.json(
+            { error: 'Failed to load blocks' },
+            { status: 500 }
+        )
+    }
+}
+
 export async function PUT(
     req: NextRequest,
     { params }: { params: { noteId: string } }

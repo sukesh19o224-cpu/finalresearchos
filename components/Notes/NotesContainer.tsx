@@ -1,160 +1,204 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Ribbon } from './Ribbon'
 import { Block } from './Block'
-import { NotesProvider } from './NotesContext'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface NoteBlock {
-    id: string
-    header: string
-    content: string // HTML content
-    order: number
+  id: string
+  header: string
+  content: string
+  order: number
 }
 
 interface NotesContainerProps {
-    noteId: string
-    initialBlocks?: NoteBlock[]
+  noteId: string
 }
 
-export function NotesContainer({ noteId, initialBlocks = [] }: NotesContainerProps) {
+export function NotesContainer({ noteId }: NotesContainerProps) {
+  const [blocks, setBlocks] = useState<NoteBlock[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+
+  // Load blocks on mount
+  useEffect(() => {
+    loadBlocks()
+  }, [noteId])
+
+  const loadBlocks = async () => {
+    try {
+      setIsLoading(true)
+      const res = await fetch(`/api/notes/${noteId}/blocks`)
+      const data = await res.json()
+      
+      if (data.blocks && data.blocks.length > 0) {
+        setBlocks(data.blocks)
+      } else {
+        // Initialize with one empty block
+        setBlocks([{
+          id: uuidv4(),
+          header: 'New block header name',
+          content: '',
+          order: 1
+        }])
+      }
+    } catch (error) {
+      console.error('Failed to load blocks:', error)
+      // Initialize with one empty block on error
+      setBlocks([{
+        id: uuidv4(),
+        header: 'New block header name',
+        content: '',
+        order: 1
+      }])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Auto-save with debounce
+  useEffect(() => {
+    if (isLoading) return // Don't save during initial load
+
+    const timer = setTimeout(async () => {
+      setIsSaving(true)
+      try {
+        await fetch(`/api/notes/${noteId}/blocks`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ blocks }),
+        })
+        setLastSaved(new Date())
+      } catch (error) {
+        console.error('Failed to save blocks:', error)
+      } finally {
+        setIsSaving(false)
+      }
+    }, 2000) // 2 second debounce
+
+    return () => clearTimeout(timer)
+  }, [blocks, noteId, isLoading])
+
+  const addBlock = () => {
+    const newBlock: NoteBlock = {
+      id: uuidv4(),
+      header: 'New block header name',
+      content: '',
+      order: blocks.length + 1
+    }
+    setBlocks([...blocks, newBlock])
+  }
+
+  const deleteBlock = (blockId: string) => {
+    // Don't allow deleting the last block
+    if (blocks.length === 1) return
+    
+    const newBlocks = blocks.filter(b => b.id !== blockId)
+    // Renumber remaining blocks
+    newBlocks.forEach((b, idx) => b.order = idx + 1)
+    setBlocks(newBlocks)
+  }
+
+  const moveBlock = (blockId: string, direction: 'up' | 'down') => {
+    const index = blocks.findIndex(b => b.id === blockId)
+    
+    if (direction === 'up' && index > 0) {
+      const newBlocks = [...blocks]
+      // Swap with previous block
+      ;[newBlocks[index], newBlocks[index - 1]] = [newBlocks[index - 1], newBlocks[index]]
+      // Update order numbers
+      newBlocks.forEach((b, idx) => b.order = idx + 1)
+      setBlocks(newBlocks)
+    }
+    
+    if (direction === 'down' && index < blocks.length - 1) {
+      const newBlocks = [...blocks]
+      // Swap with next block
+      ;[newBlocks[index], newBlocks[index + 1]] = [newBlocks[index + 1], newBlocks[index]]
+      // Update order numbers
+      newBlocks.forEach((b, idx) => b.order = idx + 1)
+      setBlocks(newBlocks)
+    }
+  }
+
+  const updateBlock = (blockId: string, changes: Partial<NoteBlock>) => {
+    setBlocks(blocks.map(b => 
+      b.id === blockId ? { ...b, ...changes } : b
+    ))
+  }
+
+  if (isLoading) {
     return (
-        <NotesProvider>
-            <NotesContainerContent noteId={noteId} initialBlocks={initialBlocks} />
-        </NotesProvider>
-    )
-}
-
-function NotesContainerContent({ noteId, initialBlocks = [] }: NotesContainerProps) {
-    const [blocks, setBlocks] = useState<NoteBlock[]>(initialBlocks)
-    const [isSaving, setIsSaving] = useState(false)
-
-    // Sort blocks by order
-    const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order)
-
-    // Debounced save function
-    useEffect(() => {
-        const timer = setTimeout(async () => {
-            // Skip save if blocks haven't changed from initial (simple ref check won't work well here, 
-            // but for now we just want to avoid saving on mount if nothing changed)
-            // A better approach is to track isDirty
-
-            setIsSaving(true)
-            try {
-                await fetch(`/api/notes/${noteId}/blocks`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ blocks }),
-                })
-            } catch (error) {
-                console.error('Failed to save notes:', error)
-            } finally {
-                setIsSaving(false)
-            }
-        }, 1000)
-
-        return () => clearTimeout(timer)
-    }, [blocks, noteId])
-
-    const addBlock = () => {
-        const newBlock: NoteBlock = {
-            id: uuidv4(),
-            header: 'New block header name',
-            content: '<p></p>',
-            order: blocks.length + 1
-        }
-        setBlocks([...blocks, newBlock])
-    }
-
-    const addBlockAfter = (currentBlockId: string) => {
-        const currentIndex = blocks.findIndex(b => b.id === currentBlockId)
-        const newBlock: NoteBlock = {
-            id: uuidv4(),
-            header: 'New block header name',
-            content: '<p></p>',
-            order: currentIndex + 1.5 // Will be renormalized
-        }
-
-        // Insert and renormalize orders
-        const updatedBlocks = [...blocks]
-        updatedBlocks.splice(currentIndex + 1, 0, newBlock)
-        updatedBlocks.forEach((b, idx) => b.order = idx + 1)
-
-        setBlocks(updatedBlocks)
-
-        // Focus new block after a short delay
-        setTimeout(() => {
-            const newBlockElement = document.querySelector(`[data-block-id="${newBlock.id}"] .ProseMirror`)
-            if (newBlockElement instanceof HTMLElement) {
-                newBlockElement.focus()
-            }
-        }, 100)
-    }
-
-    const deleteBlock = (blockId: string) => {
-        setBlocks(blocks.filter(b => b.id !== blockId))
-    }
-
-    const updateBlock = (blockId: string, updates: Partial<NoteBlock>) => {
-        setBlocks(blocks.map(b => b.id === blockId ? { ...b, ...updates } : b))
-    }
-
-    const reorderBlock = (blockId: string, direction: 'up' | 'down') => {
-        const index = sortedBlocks.findIndex(b => b.id === blockId)
-        if (index === -1) return
-        if (direction === 'up' && index === 0) return
-        if (direction === 'down' && index === sortedBlocks.length - 1) return
-
-        const newBlocks = [...sortedBlocks]
-        const swapIndex = direction === 'up' ? index - 1 : index + 1
-
-        // Swap orders
-        const tempOrder = newBlocks[index].order
-        newBlocks[index].order = newBlocks[swapIndex].order
-        newBlocks[swapIndex].order = tempOrder
-
-        setBlocks(newBlocks)
-    }
-
-    return (
-        <div className="flex flex-col h-full bg-gray-50">
-            <Ribbon />
-
-            {isSaving && (
-                <div className="absolute top-2 right-2 text-xs text-gray-400">
-                    Saving...
-                </div>
-            )}
-
-            <div className="flex-1 overflow-y-auto p-8">
-                <div className="max-w-4xl mx-auto space-y-6">
-                    {sortedBlocks.map((block) => (
-                        <Block
-                            key={block.id}
-                            block={block}
-                            onDelete={() => deleteBlock(block.id)}
-                            onUpdate={(updates) => updateBlock(block.id, updates)}
-                            onReorder={(direction) => reorderBlock(block.id, direction)}
-                            onAddBlockAfter={() => addBlockAfter(block.id)}
-                            canMoveUp={block.order > 1}
-                            canMoveDown={block.order < blocks.length}
-                            canDelete={blocks.length > 1}
-                        />
-                    ))}
-
-                    <Button
-                        onClick={addBlock}
-                        className="w-full py-8 border-2 border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:bg-gray-50"
-                        variant="ghost"
-                    >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add New Block
-                    </Button>
-                </div>
-            </div>
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600 mb-2" />
+          <p className="text-sm text-gray-600">Loading notes...</p>
         </div>
+      </div>
     )
+  }
+
+  return (
+    <div className="h-full overflow-auto p-6 bg-gray-50">
+      {/* Save indicator */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm">
+          {isSaving ? (
+            <span className="flex items-center text-blue-600">
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              Saving...
+            </span>
+          ) : lastSaved ? (
+            <span className="text-gray-500">
+              Saved at {lastSaved.toLocaleTimeString()}
+            </span>
+          ) : (
+            <span className="text-gray-400">No changes yet</span>
+          )}
+        </div>
+        
+        <Button 
+          onClick={addBlock}
+          size="sm"
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Block
+        </Button>
+      </div>
+
+      {/* Blocks */}
+      <div className="space-y-4">
+        {blocks.map((block, index) => (
+          <Block
+            key={block.id}
+            block={block}
+            canMoveUp={index > 0}
+            canMoveDown={index < blocks.length - 1}
+            canDelete={blocks.length > 1}
+            onUpdate={(changes: Partial<NoteBlock>) => updateBlock(block.id, changes)}
+            onDelete={() => deleteBlock(block.id)}
+            onMoveUp={() => moveBlock(block.id, 'up')}
+            onMoveDown={() => moveBlock(block.id, 'down')}
+          />
+        ))}
+      </div>
+
+      {/* Add block button at bottom */}
+      <div className="mt-6 flex justify-center">
+        <Button 
+          onClick={addBlock}
+          variant="outline"
+          size="lg"
+          className="gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add Block
+        </Button>
+      </div>
+    </div>
+  )
 }

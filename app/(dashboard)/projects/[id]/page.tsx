@@ -15,7 +15,7 @@ import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { LiteratureManager } from '@/components/literature/LiteratureManager'
 import { ExportPanel } from '@/components/export/ExportPanel'
 import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles } from 'lucide-react'
-import { NotesContainer, type NoteBlock } from '@/components/Notes/NotesContainer'
+import { NotesContainer } from '@/components/Notes/NotesContainer'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -70,14 +70,6 @@ export default function ProjectDetailPage() {
 
   // Find Overview Page (first page or specific title)
   const overviewPage = project.pages?.[0]
-
-  // Transform DB blocks to NoteBlocks
-  const initialBlocks: NoteBlock[] = overviewPage?.blocks?.map((b: any) => ({
-    id: b.id,
-    order: b.position,
-    header: b.content?.header || 'Untitled Section',
-    content: b.content?.html || '<p></p>'
-  })) || []
 
   // Research Tools - Keep only: Team Collaboration, Export & Publish, Lab Notebook, Literature
   const researchTools = [
@@ -165,10 +157,7 @@ export default function ProjectDetailPage() {
                 </p>
               </div>
               <div className="h-[800px]">
-                <NotesContainer
-                  noteId={overviewPage.id}
-                  initialBlocks={initialBlocks}
-                />
+                <NotesContainer noteId={overviewPage.id} />
               </div>
             </div>
           ) : (
