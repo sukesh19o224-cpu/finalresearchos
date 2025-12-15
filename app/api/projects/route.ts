@@ -56,13 +56,25 @@ export async function POST(request: NextRequest) {
 
     const { title, description, researchType } = createProjectSchema.parse(body)
 
+    // Create project with an overview page
     const project = await prisma.project.create({
       data: {
         userId,
         title,
         description,
         researchType,
+        pages: {
+          create: {
+            title: 'Overview',
+            icon: '📋',
+            position: 0,
+            properties: {},
+          }
+        }
       },
+      include: {
+        pages: true
+      }
     })
 
     return NextResponse.json({ project }, { status: 201 })

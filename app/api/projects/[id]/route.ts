@@ -48,6 +48,20 @@ export async function GET(
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
 
+    // Create overview page if it doesn't exist (for old projects)
+    if (!project.pages || project.pages.length === 0) {
+      const overviewPage = await prisma.page.create({
+        data: {
+          projectId: project.id,
+          title: 'Overview',
+          icon: '📋',
+          position: 0,
+          properties: {},
+        }
+      })
+      project.pages = [overviewPage]
+    }
+
     // Update last accessed
     await prisma.project.update({
       where: { id: params.id },
