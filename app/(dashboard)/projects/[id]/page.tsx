@@ -152,9 +152,6 @@ export default function ProjectDetailPage() {
             <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
               <div className="p-4 border-b bg-gray-50">
                 <h2 className="text-lg font-semibold text-gray-800">Research Notes</h2>
-                <p className="text-sm text-gray-500">
-                  Document your findings using the block-based editor below.
-                </p>
               </div>
               <div className="h-[800px]">
                 <NotesContainer noteId={overviewPage.id} />

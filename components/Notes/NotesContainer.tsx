@@ -21,7 +21,6 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
   const [blocks, setBlocks] = useState<NoteBlock[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
 
   // Load blocks on mount
   useEffect(() => {
@@ -71,7 +70,6 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ blocks }),
         })
-        setLastSaved(new Date())
       } catch (error) {
         console.error('Failed to save blocks:', error)
       } finally {
@@ -151,12 +149,8 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
               <Loader2 className="h-3 w-3 animate-spin mr-1" />
               Saving...
             </span>
-          ) : lastSaved ? (
-            <span className="text-gray-500">
-              Saved at {lastSaved.toLocaleTimeString()}
-            </span>
           ) : (
-            <span className="text-gray-400">No changes yet</span>
+            <span className="text-gray-500">All changes saved</span>
           )}
         </div>
         
