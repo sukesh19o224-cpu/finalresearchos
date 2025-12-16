@@ -12,6 +12,16 @@ export async function POST(
         const { sessionId } = params
         const { role, content } = await req.json()
 
+        console.log('Received message:', { sessionId, role, content })
+
+        // Check if GROQ_API_KEY is set
+        if (!GROQ_API_KEY) {
+            console.error('GROQ_API_KEY is not set')
+            return NextResponse.json({ 
+                error: 'AI service not configured. Please set GROQ_API_KEY.' 
+            }, { status: 500 })
+        }
+
         // 1. Fetch current session
         const session = await prisma.aIConversation.findUnique({
             where: { id: sessionId }
@@ -63,7 +73,9 @@ export async function POST(
         })
 
         if (!response.ok) {
-            throw new Error('Failed to get AI response')
+            const errorText = await response.text()
+            console.error('Groq API error:', response.status, errorText)
+            throw new Error(`Failed to get AI response: ${response.status} - ${errorText}`)
         }
 
         const data = await response.json()
@@ -89,6 +101,10 @@ export async function POST(
 
     } catch (error) {
         console.error('Send message error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        const errorMessage = error instanceof Error ? error.message : 'Internal server error'
+        return NextResponse.json({ 
+            error: errorMessage,
+            details: error instanceof Error ? error.stack : undefined 
+        }, { status: 500 })
     }
 }

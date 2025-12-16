@@ -43,14 +43,27 @@ export function ChatWindow() {
         setInput('')
 
         try {
-            await fetch(`/api/research-assistant/sessions/${sessionId}/message`, {
+            const response = await fetch(`/api/research-assistant/sessions/${sessionId}/message`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: 'user', content: tempMsg.content })
             })
-            mutate() // Revalidate
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                console.error('API Error:', errorData)
+                alert(`Failed to send message: ${errorData.error || 'Please try again'}`)
+                // Revert optimistic update
+                mutate()
+                return
+            }
+
+            mutate() // Revalidate to get the AI response
         } catch (error) {
             console.error('Failed to send message:', error)
+            alert('Failed to send message. Please try again.')
+            // Revert optimistic update
+            mutate()
         }
     }
 
