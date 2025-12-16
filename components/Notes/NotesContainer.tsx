@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Block } from './Block'
 import { NotesProvider } from './NotesContext'
+import { Ribbon } from './Ribbon'
 import { Button } from '@/components/ui/button'
 import { Plus, Loader2 } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
@@ -167,29 +168,33 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
 
   return (
     <NotesProvider>
-      <div className="h-full overflow-auto p-6 bg-gray-50">
-        {/* Save indicator */}
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-sm">
-            {isSaving ? (
-              <span className="flex items-center text-blue-600">
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                Saving...
-              </span>
-            ) : (
-              <span className="text-gray-500">All changes saved</span>
-            )}
+      <div className="h-full overflow-auto bg-gray-50">
+        {/* Formatting Ribbon */}
+        <Ribbon />
+
+        <div className="px-6 pt-2 pb-6">
+          {/* Save indicator */}
+          <div className="mb-4 flex items-center justify-between">
+            <div className="text-sm">
+              {isSaving ? (
+                <span className="flex items-center text-blue-600">
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                  Saving...
+                </span>
+              ) : (
+                <span className="text-gray-500">All changes saved</span>
+              )}
+            </div>
+            
+            <Button 
+              onClick={addBlock}
+              size="sm"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Block
+            </Button>
           </div>
-          
-          <Button 
-            onClick={addBlock}
-            size="sm"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Block
-          </Button>
-        </div>
 
         {/* Blocks */}
         <div className="space-y-4">
@@ -209,17 +214,18 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
           ))}
         </div>
 
-        {/* Add block button at bottom */}
-        <div className="mt-6 flex justify-center">
-          <Button 
-            onClick={addBlock}
-            variant="outline"
-            size="lg"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Block
-          </Button>
+          {/* Add block button at bottom */}
+          <div className="mt-6 flex justify-center">
+            <Button 
+              onClick={addBlock}
+              variant="outline"
+              size="lg"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Block
+            </Button>
+          </div>
         </div>
       </div>
     </NotesProvider>
