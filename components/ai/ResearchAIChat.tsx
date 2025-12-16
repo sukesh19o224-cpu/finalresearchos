@@ -100,7 +100,9 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
       })
 
       if (!response.ok) {
-        throw new Error('Failed to send message')
+        const errorData = await response.json()
+        console.error('Chat API error response:', errorData)
+        throw new Error(errorData.error || 'Failed to send message')
       }
 
       const data = await response.json()
@@ -114,12 +116,17 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
       setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Chat error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
       toast({
         title: 'Error',
-        description: 'Failed to send message. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       })
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', timestamp: new Date() }])
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `Sorry, I encountered an error: ${errorMessage}`, 
+        timestamp: new Date() 
+      }])
     } finally {
       setIsLoading(false)
     }

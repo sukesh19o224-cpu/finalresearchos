@@ -24,8 +24,19 @@ export interface GroqChatRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    // Check if GROQ_API_KEY is set
+    if (!GROQ_API_KEY) {
+      console.error('GROQ_API_KEY is not configured')
+      return NextResponse.json(
+        { error: 'AI service not configured. Please contact administrator.' },
+        { status: 500 }
+      )
+    }
+
     const body = await req.json() as GroqChatRequest
     const { messages, context } = body
+
+    console.log('Chat API received:', { messagesCount: messages?.length, hasContext: !!context })
 
     // Validate messages
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -84,15 +95,18 @@ Always be concise, actionable, and scientifically accurate.`
         apiKey: GROQ_API_KEY ? 'SET' : 'NOT SET'
       })
       return NextResponse.json(
-        { error: `AI service error: ${response.statusText}` },
+        { error: `AI service error: ${response.status} - ${response.statusText}. ${error}` },
         { status: response.status }
       )
     }
 
     const data = await response.json()
+    const assistantMessage = data.choices[0]?.message?.content || 'No response'
+
+    console.log('Chat API success:', { messageLength: assistantMessage.length })
 
     return NextResponse.json({
-      message: data.choices[0]?.message?.content || 'No response',
+      message: assistantMessage,
       usage: data.usage,
     })
   } catch (error: any) {
