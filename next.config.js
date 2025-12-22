@@ -1,4 +1,6 @@
 ﻿/** @type {import('next').NextConfig} */
+const path = require('path');
+
 const nextConfig = {
   experimental: {
     serverActions: {
@@ -14,6 +16,12 @@ const nextConfig = {
   poweredByHeader: false,
   webpack: (config, { isServer }) => {
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];
+
+    // Add explicit path aliases for Vercel compatibility
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    };
 
     // Tree-shaking optimization
     config.optimization = {
