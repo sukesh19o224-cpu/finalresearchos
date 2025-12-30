@@ -14,16 +14,14 @@ import { CollaborationPanel } from '@/components/collaboration/CollaborationPane
 import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { LiteratureManager } from '@/components/literature/LiteratureManager'
 import { ExportPanel } from '@/components/export/ExportPanel'
-import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles, ChevronRight, ChevronLeft, Home, BarChart3, Lightbulb } from 'lucide-react'
+import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles } from 'lucide-react'
 import { NotesContainer } from '@/components/Notes/NotesContainer'
-import { Button } from '@/components/ui/button'
 
 export default function ProjectDetailPage() {
   const params = useParams()
   const projectId = params.id as string
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activeView, setActiveView] = useState('overview')
 
   useEffect(() => {
@@ -44,7 +42,36 @@ export default function ProjectDetailPage() {
     }
   }
 
-  // Research Tools - defined before early returns
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="text-center py-12">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+          <p className="mt-4 text-gray-600">Loading project...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <div className="p-8">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <h3 className="text-lg font-semibold mb-2">Project not found</h3>
+            <p className="text-gray-600">
+              This project may have been deleted or you don't have access to it.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Find Overview Page (first page or specific title)
+  const overviewPage = project.pages?.[0]
+
+  // Research Tools - Keep only: Team Collaboration, Export & Publish, Lab Notebook, Literature
   const researchTools = [
     {
       id: 'collaboration',
@@ -80,141 +107,40 @@ export default function ProjectDetailPage() {
     },
   ]
 
-  // Navigation items for sidebar
-  const navigationItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'visualization', label: 'Visualization', icon: BarChart3 },
-    { id: 'insights', label: 'Insights', icon: Lightbulb },
-  ]
-
-  if (loading) {
-    return (
-      <div className="p-8">
-        <div className="text-center py-12">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading project...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!project) {
-    return (
-      <div className="p-8">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h3 className="text-lg font-semibold mb-2">Project not found</h3>
-            <p className="text-gray-600">
-              This project may have been deleted or you don't have access to it.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // Find Overview Page (first page or specific title)
-  const overviewPage = project.pages?.[0]
-
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Left Sidebar Ribbon */}
-      <div
-        className={`fixed left-0 top-0 h-full bg-white border-r shadow-lg transition-all duration-300 ease-in-out z-50 ${
-          sidebarOpen ? 'w-64' : 'w-0'
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Navigation Items */}
-          <nav className="flex-1 p-4 space-y-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-              Main Sections
-            </div>
-            {navigationItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveView(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    activeView === item.id
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              )
-            })}
-
-            <div className="pt-6 mt-6 border-t">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Research Tools
-              </div>
-              {researchTools.map((tool) => {
-                const Icon = tool.icon
-                return (
-                  <button
-                    key={tool.id}
-                    onClick={() => setActiveView(tool.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                      activeView === tool.id
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span className="font-medium text-sm">{tool.title}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </nav>
-        </div>
-      </div>
-
-      {/* Toggle Button */}
-      <Button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={`fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 rounded-r-lg rounded-l-none shadow-lg ${
-          sidebarOpen ? 'left-64' : 'left-0'
-        }`}
-        size="sm"
-        variant="default"
-      >
-        {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-      </Button>
-
-      {/* Main Content Area */}
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          sidebarOpen ? 'ml-64' : 'ml-0'
-        }`}
-      >
-        <div className="h-full overflow-y-auto">
-          <div className="p-8">
-            {/* Header - Only for Overview */}
-            {activeView === 'overview' && (
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
-                {project.description && (
-                  <p className="text-gray-600">{project.description}</p>
-                )}
-                {project.researchType && (
-                  <div className="mt-2">
-                    <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">
-                      {project.researchType}
-                    </span>
-                  </div>
-                )}
+    <div className="p-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
+            {project.description && (
+              <p className="text-gray-600">{project.description}</p>
+            )}
+            {project.researchType && (
+              <div className="mt-2">
+                <span className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded">
+                  {project.researchType}
+                </span>
               </div>
             )}
+          </div>
+        </div>
+      </div>
 
-            {/* Content Tabs */
-            <Tabs value={activeView} onValueChange={setActiveView} className="space-y-6">
-              {/* Hidden TabsList - navigation is in sidebar */}
-              <TabsList className="hidden"></TabsList>
+      {/* NEW TABS: Overview, Visualization, Insights */}
+      <Tabs value={activeView} onValueChange={setActiveView} className="space-y-6">
+        <TabsList className="inline-flex h-auto p-1 bg-gray-100 rounded-lg">
+          <TabsTrigger value="overview" className="rounded-md px-4 py-2">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="visualization" className="rounded-md px-4 py-2">
+            Visualization
+          </TabsTrigger>
+          <TabsTrigger value="insights" className="rounded-md px-4 py-2">
+            Insights
+          </TabsTrigger>
+        </TabsList>
 
         {/* Overview Tab - Notes Container */}
         <TabsContent value="overview" className="space-y-6">
@@ -319,9 +245,6 @@ export default function ProjectDetailPage() {
           <ExportPanel projectId={projectId} projectTitle={project.title} />
         </TabsContent>
       </Tabs>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
