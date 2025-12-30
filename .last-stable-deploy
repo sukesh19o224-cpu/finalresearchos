@@ -2,19 +2,21 @@
 # This file tracks the last commit that successfully deployed to Vercel
 # Use this to recover if new changes break the build
 
-LAST_WORKING_COMMIT=de55517
+LAST_WORKING_COMMIT=733512a
 DEPLOYMENT_DATE=2025-12-30
-DESCRIPTION=Data & Analysis tab removed, Visualization tab cleared, standard horizontal tabs
-FEATURES=Overview tab, Visualization tab (empty), Insights tab, Research Tools
+DESCRIPTION=Collapsible sidebar with hover auto-show, component extraction pattern
+FEATURES=Sidebar navigation, hover trigger, manual toggle, Overview/Visualization/Insights tabs
 
 # To recover this version:
-# git checkout de55517 -- app/(dashboard)/projects/[id]/page.tsx
+# git checkout 733512a -- app/(dashboard)/projects/[id]/page.tsx
 # or
-# git reset --hard de55517
-# or use the git tag: git checkout stable-deploy-2025-12-30-*
+# git reset --hard 733512a
+# or use the git tag: git checkout stable-v2-sidebar
 
 NOTES=
-- Removed Data & Analysis tab
-- Cleared visualization tab for redesign  
-- Sidebar navigation attempt failed with JSX parse errors
-- Reverted to horizontal tab layout (working version)
+- Successfully implemented sidebar using component extraction
+- Avoided template literal issues by pre-computing className strings
+- Hover auto-show working
+- Manual toggle button included
+- Build passed without errors
+- Previous stable version: de55517 (stable-v1)
