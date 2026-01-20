@@ -108,18 +108,72 @@ export function Ribbon({ isSaving = false, onAddBlock }: RibbonProps = {}) {
         activeEditor.chain().focus().toggleCode().run()
         break
       case 'bulletList':
-        activeEditor.chain().focus().toggleBulletList().run()
+        // Convert hard breaks to paragraphs for proper multi-line list formatting
+        convertHardBreaksToListItems('bulletList')
         break
       case 'orderedList':
-        activeEditor.chain().focus().toggleOrderedList().run()
+        // Convert hard breaks to paragraphs for proper multi-line list formatting
+        convertHardBreaksToListItems('orderedList')
         break
       case 'taskList':
-        activeEditor.chain().focus().toggleTaskList().run()
+        // Convert hard breaks to paragraphs for proper multi-line list formatting
+        convertHardBreaksToListItems('taskList')
         break
       case 'clearFormat':
         activeEditor.chain().focus().clearNodes().unsetAllMarks().run()
         break
     }
+  }
+
+  const convertHardBreaksToListItems = (listType: 'bulletList' | 'orderedList' | 'taskList') => {
+    const { state } = activeEditor
+    const { from, to } = state.selection
+    const { doc, tr } = state
+
+    // Get the content in the selection
+    let hasHardBreaks = false
+    doc.nodesBetween(from, to, (node) => {
+      if (node.type.name === 'hardBreak') {
+        hasHardBreaks = true
+        return false
+      }
+    })
+
+    // If no hard breaks, just toggle the list normally
+    if (!hasHardBreaks) {
+      if (listType === 'bulletList') {
+        activeEditor.chain().focus().toggleBulletList().run()
+      } else if (listType === 'orderedList') {
+        activeEditor.chain().focus().toggleOrderedList().run()
+      } else {
+        activeEditor.chain().focus().toggleTaskList().run()
+      }
+      return
+    }
+
+    // Split hard breaks into separate paragraphs first
+    let pos = from
+    doc.nodesBetween(from, to, (node, nodePos) => {
+      if (node.type.name === 'hardBreak') {
+        // Replace hard break with paragraph break
+        const mappedPos = tr.mapping.map(nodePos)
+        tr.replaceWith(mappedPos, mappedPos + 1, state.schema.nodes.paragraph.create())
+      }
+    })
+
+    // Apply the transaction
+    activeEditor.view.dispatch(tr)
+
+    // Now toggle the list
+    setTimeout(() => {
+      if (listType === 'bulletList') {
+        activeEditor.chain().focus().toggleBulletList().run()
+      } else if (listType === 'orderedList') {
+        activeEditor.chain().focus().toggleOrderedList().run()
+      } else {
+        activeEditor.chain().focus().toggleTaskList().run()
+      }
+    }, 0)
   }
 
   const setHeading = (level: 1 | 2 | 3) => {
