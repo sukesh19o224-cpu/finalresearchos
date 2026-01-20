@@ -78,20 +78,21 @@ export function BlockEditor({
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2 leading-normal',
       },
       handleKeyDown: (view, event) => {
-        // Enter key at end of block creates new block
-        if (event.key === 'Enter' && !event.shiftKey) {
-          const { state } = view
-          const { selection } = state
-          const { $from } = selection
+        // Shift+Enter creates new block
+        if (event.key === 'Enter' && event.shiftKey) {
+          event.preventDefault()
+          onAddBlockAfter()
+          return true
+        }
 
-          // Check if at end of document
-          const isAtEnd = $from.pos === state.doc.content.size - 1
-          
-          if (isAtEnd) {
-            event.preventDefault()
-            onAddBlockAfter()
-            return true
-          }
+        // Enter creates soft break (new line within same block)
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          const { state, dispatch } = view
+          const { tr } = state
+          // Insert a hard break (br tag) for consistent line spacing
+          dispatch(tr.replaceSelectionWith(state.schema.nodes.hardBreak.create()).scrollIntoView())
+          return true
         }
 
         // Backspace on empty block deletes it
