@@ -241,21 +241,21 @@ export function NotesContainer({ noteId }: NotesContainerProps) {
         </div>
 
           {/* Add block button at bottom */}
-          <div className=\"mt-6 flex justify-center\">
+          <div className="mt-6 flex justify-center">
             <Button 
               onClick={addBlock}
-              variant=\"outline\"
-              size=\"lg\"
-              className=\"gap-2\"
+              variant="outline"
+              size="lg"
+              className="gap-2"
             >
-              <Plus className=\"h-4 w-4\" />
+              <Plus className="h-4 w-4" />
               Add Block
             </Button>
           </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    </NotesProvider>
+      </NotesProvider>
     </ErrorBoundary>
   )
 }
