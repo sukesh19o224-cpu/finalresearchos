@@ -50,6 +50,9 @@ export function BlockEditor({
       TaskList,
       TaskItem.configure({
         nested: true,
+        HTMLAttributes: {
+          class: 'flex items-start gap-2',
+        },
       }),
       Image.configure({
         inline: true,
@@ -72,7 +75,7 @@ export function BlockEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] px-3 py-2 leading-normal',
       },
       handleKeyDown: (view, event) => {
         // Enter key at end of block creates new block
