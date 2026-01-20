@@ -18,12 +18,9 @@ export interface NoteBlock {
 
 interface NotesContainerProps {
   noteId: string
-  onSavingChange?: (isSaving: boolean) => void
-  onAddBlockRequest?: () => void
-  exposeAddBlock?: (addBlockFn: () => void) => void
 }
 
-export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: NotesContainerProps) {
+export function NotesContainer({ noteId }: NotesContainerProps) {
   const [blocks, setBlocks] = useState<NoteBlock[]>([])
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -70,7 +67,6 @@ export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: Notes
 
     const timer = setTimeout(async () => {
       setIsSaving(true)
-      if (onSavingChange) onSavingChange(true)
       try {
         await fetch(`/api/notes/${noteId}/blocks`, {
           method: 'PUT',
@@ -81,14 +77,13 @@ export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: Notes
         console.error('Failed to save blocks:', error)
       } finally {
         setIsSaving(false)
-        if (onSavingChange) onSavingChange(false)
       }
     }, 2000) // 2 second debounce
 
     return () => clearTimeout(timer)
-  }, [blocks, noteId, isLoading, onSavingChange])
+  }, [blocks, noteId, isLoading])
 
-  const addBlock = useCallback(() => {
+  const addBlock = () => {
     const newBlock: NoteBlock = {
       id: uuidv4(),
       header: 'New block header name',
@@ -96,14 +91,7 @@ export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: Notes
       order: blocks.length + 1
     }
     setBlocks([...blocks, newBlock])
-  }, [blocks])
-
-  // Expose addBlock function to parent
-  useEffect(() => {
-    if (exposeAddBlock) {
-      exposeAddBlock(addBlock)
-    }
-  }, [exposeAddBlock, addBlock])
+  }
 
   const deleteBlock = (blockId: string) => {
     // Don't allow deleting the last block
@@ -203,15 +191,39 @@ export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: Notes
   return (
     <ErrorBoundary>
       <NotesProvider>
-        <div className="h-full overflow-auto bg-gray-50">
-          {/* Formatting Ribbon - Sticky at top */}
-          <div className="sticky top-0 z-10 bg-white border-b">
+        <div className="h-full flex flex-col bg-gray-50">
+          {/* Header with save status and Add Block button */}
+          <div className="flex-shrink-0 px-4 py-3 bg-white border-b flex items-center justify-between">
+            <div className="text-sm">
+              {isSaving ? (
+                <span className="flex items-center text-blue-600">
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                  Saving...
+                </span>
+              ) : (
+                <span className="text-gray-500">All changes saved</span>
+              )}
+            </div>
+            <Button 
+              onClick={addBlock}
+              size="sm"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Block
+            </Button>
+          </div>
+
+          {/* Formatting Ribbon - Sticky */}
+          <div className="flex-shrink-0 sticky top-0 z-10 bg-white border-b">
             <Ribbon />
           </div>
 
-        <div className="px-6 pt-2 pb-6">
-        {/* Blocks */}
-        <div className="space-y-4">
+          {/* Scrollable content area */}
+          <div className="flex-1 overflow-auto">
+            <div className="px-6 pt-2 pb-6">
+              {/* Blocks */}
+              <div className="space-y-4">
           {blocks.map((block, index) => (
             <Block
               key={block.id}
@@ -229,19 +241,20 @@ export function NotesContainer({ noteId, onSavingChange, exposeAddBlock }: Notes
         </div>
 
           {/* Add block button at bottom */}
-          <div className="mt-6 flex justify-center">
+          <div className=\"mt-6 flex justify-center\">
             <Button 
               onClick={addBlock}
-              variant="outline"
-              size="lg"
-              className="gap-2"
+              variant=\"outline\"
+              size=\"lg\"
+              className=\"gap-2\"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className=\"h-4 w-4\" />
               Add Block
             </Button>
           </div>
         </div>
       </div>
+    </div>
     </NotesProvider>
     </ErrorBoundary>
   )

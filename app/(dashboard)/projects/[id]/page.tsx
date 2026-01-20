@@ -14,11 +14,10 @@ import { CollaborationPanel } from '@/components/collaboration/CollaborationPane
 import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { LiteratureManager } from '@/components/literature/LiteratureManager'
 import { ExportPanel } from '@/components/export/ExportPanel'
-import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles, Home, BarChart3, Lightbulb, Plus, Loader2 } from 'lucide-react'
+import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles, Home, BarChart3, Lightbulb } from 'lucide-react'
 import { NotesContainer } from '@/components/Notes/NotesContainer'
 import { ProjectSidebar } from '@/components/navigation/ProjectSidebar'
 import { SidebarToggle } from '@/components/navigation/SidebarToggle'
-import { Button } from '@/components/ui/button'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -27,8 +26,6 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [addBlockFn, setAddBlockFn] = useState<any>(null)
 
   useEffect(() => {
     if (projectId) {
@@ -152,37 +149,11 @@ export default function ProjectDetailPage() {
           {/* Notes Container (Jupyter-style blocks) */}
           {overviewPage ? (
             <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
-              {/* Header with title, save indicator, and add block button */}
-              <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-lg font-semibold text-gray-800">Research Notes</h2>
-                  <div className="text-sm">
-                    {isSaving ? (
-                      <span className="flex items-center text-blue-600">
-                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                        Saving...
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">All changes saved</span>
-                    )}
-                  </div>
-                </div>
-                <Button 
-                  onClick={() => addBlockFn && addBlockFn()}
-                  size="sm"
-                  className="gap-2"
-                  disabled={!addBlockFn}
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Block
-                </Button>
+              <div className="p-4 border-b bg-gray-50">
+                <h2 className="text-lg font-semibold text-gray-800">Research Notes</h2>
               </div>
               <div className="h-[800px]">
-                <NotesContainer 
-                  noteId={overviewPage.id} 
-                  onSavingChange={setIsSaving}
-                  exposeAddBlock={setAddBlockFn}
-                />
+                <NotesContainer noteId={overviewPage.id} />
               </div>
             </div>
           ) : (
