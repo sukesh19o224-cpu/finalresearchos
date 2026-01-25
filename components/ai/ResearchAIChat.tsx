@@ -57,11 +57,21 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
   const [isLoading, setIsLoading] = useState(false)
   const [includeSearch, setIncludeSearch] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { toast } = useToast()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`
+    }
+  }, [input])
 
   // Handle initial message
   useEffect(() => {
@@ -241,6 +251,7 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
           </div>
           <div className="flex items-end gap-2">
             <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
