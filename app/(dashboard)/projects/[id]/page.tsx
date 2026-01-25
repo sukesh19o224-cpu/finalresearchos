@@ -8,16 +8,17 @@ import {
   DataManagementTab,
   VisualizationTab,
   AIInsightsTab,
-  ResearchAIChat
 } from '@/components/LazyComponents'
 import { CollaborationPanel } from '@/components/collaboration/CollaborationPanel'
 import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { LiteratureManager } from '@/components/literature/LiteratureManager'
 import { ExportPanel } from '@/components/export/ExportPanel'
-import { Users, BookOpen, FileText, Download, ArrowRight, Sparkles, Home, BarChart3, Lightbulb } from 'lucide-react'
+import { Users, BookOpen, FileText, Download, Home, BarChart3, Lightbulb } from 'lucide-react'
 import { NotesContainer } from '@/components/Notes/NotesContainer'
 import { ProjectSidebar } from '@/components/navigation/ProjectSidebar'
 import { SidebarToggle } from '@/components/navigation/SidebarToggle'
+import { ProjectAIChatProvider } from '@/lib/hooks/useProjectAIChat'
+import { ProjectAIChatSidebar } from '@/components/ai/ProjectAIChatSidebar'
 
 export default function ProjectDetailPage() {
   const params = useParams()
@@ -117,24 +118,25 @@ export default function ProjectDetailPage() {
   ]
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
-      <ProjectSidebar
-        isOpen={sidebarOpen}
-        activeView={activeView}
-        onViewChange={setActiveView}
-        navigationItems={navigationItems}
-        researchTools={researchTools}
-        onOpenChange={setSidebarOpen}
-      />
+    <ProjectAIChatProvider projectId={projectId}>
+      <div className="flex h-screen overflow-hidden bg-gray-50">
+        <ProjectSidebar
+          isOpen={sidebarOpen}
+          activeView={activeView}
+          onViewChange={setActiveView}
+          navigationItems={navigationItems}
+          researchTools={researchTools}
+          onOpenChange={setSidebarOpen}
+        />
 
-      <SidebarToggle
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
+        <SidebarToggle
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
 
-      <div className="flex-1 transition-all duration-300 ml-0">
-        <div className="h-full overflow-y-auto">
-          <div className="p-8">
+        <div className="flex-1 transition-all duration-300 ml-0">
+          <div className="h-full overflow-y-auto">
+            <div className="p-8">
             {activeView === 'overview' && (
               <div className="mb-8">
                 <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
@@ -163,27 +165,6 @@ export default function ProjectDetailPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* AI Interaction Panel */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Sparkles className="h-5 w-5 mr-2 text-purple-600" />
-                AI Research Assistant
-              </CardTitle>
-              <CardDescription>
-                Powered by Groq Llama 3.1 8B - Get help with your research
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResearchAIChat
-                context={{
-                  projectInfo: `Project: ${project.title}. ${project.description || ''}`,
-                  datasetInfo: project.datasets?.length ? `${project.datasets.length} datasets uploaded` : 'No datasets yet'
-                }}
-              />
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Visualization Tab - NEW */}
@@ -216,7 +197,11 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       </div>
+      
+      {/* AI Chat Sidebar - accessible from all tabs */}
+      <ProjectAIChatSidebar />
     </div>
+    </ProjectAIChatProvider>
   )
 }
 

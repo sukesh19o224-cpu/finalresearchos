@@ -31,6 +31,7 @@ interface ResearchAIChatProps {
   }
   fullScreen?: boolean
   initialUserMessage?: string
+  sidebarMode?: boolean
 }
 
 // Placeholder for searchSimilarPapers - replace with actual implementation
@@ -44,7 +45,7 @@ async function searchSimilarPapers(query: string): Promise<any[]> {
 }
 
 // ChatGPT-like interface powered by Groq Llama 3.1 8B
-export function ResearchAIChat({ context, fullScreen = false, initialUserMessage }: ResearchAIChatProps) {
+export function ResearchAIChat({ context, fullScreen = false, initialUserMessage, sidebarMode = false }: ResearchAIChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -149,31 +150,35 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
   }
 
   return (
-    <Card className={fullScreen ? 'h-full flex flex-col' : ''}>
-      <CardHeader>
+    <Card className={`${fullScreen ? 'h-full flex flex-col' : ''} ${sidebarMode ? 'border-0 shadow-none rounded-none' : ''}`}>
+      <CardHeader className={sidebarMode ? 'px-4 py-3' : ''}>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-purple-600" />
-              Research AI Assistant
+            <CardTitle className={`flex items-center gap-2 ${sidebarMode ? 'text-base' : ''}`}>
+              <Brain className={`${sidebarMode ? 'h-4 w-4' : 'h-5 w-5'} text-purple-600`} />
+              {!sidebarMode && 'Research AI Assistant'}
             </CardTitle>
-            <CardDescription>
-              Powered by Groq Llama 3.1 8B - Context-aware research help
-            </CardDescription>
+            {!sidebarMode && (
+              <CardDescription>
+                Powered by Groq Llama 3.1 8B - Context-aware research help
+              </CardDescription>
+            )}
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-purple-50 text-purple-700">
-              <Sparkles className="h-3 w-3 mr-1" />
-              AI-Powered
-            </Badge>
+            {!sidebarMode && (
+              <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                <Sparkles className="h-3 w-3 mr-1" />
+                AI-Powered
+              </Badge>
+            )}
             <Button variant="ghost" size="sm" onClick={clearChat}>
-              <RefreshCw className="h-4 w-4" />
+              <RefreshCw className={`${sidebarMode ? 'h-3 w-3' : 'h-4 w-4'}`} />
             </Button>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className={`space-y-4 ${fullScreen ? 'flex-1 flex flex-col' : ''}`}>
+      <CardContent className={`space-y-4 ${fullScreen ? 'flex-1 flex flex-col' : ''} ${sidebarMode ? 'px-3 py-2' : ''}`}>
         {/* Context indicators */}
         {context && (
           <div className="flex flex-wrap gap-2">

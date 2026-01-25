@@ -1,10 +1,10 @@
 'use client'
 
 import React from 'react'
-import { ResearchAIChat } from '@/components/ai/ResearchAIChat'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, Sparkles } from 'lucide-react'
+import { useProjectAIChat } from '@/lib/hooks/useProjectAIChat'
 
 interface InsightsTabProps {
     dataSummary: string
@@ -12,13 +12,8 @@ interface InsightsTabProps {
 }
 
 export function InsightsTab({ dataSummary, plotSummary }: InsightsTabProps) {
-    const context = {
-        datasetInfo: dataSummary,
-        plotInfo: plotSummary,
-        projectInfo: 'Analyzing experimental data'
-    }
+    const { openSidebar } = useProjectAIChat()
 
-    const [initialMessage, setInitialMessage] = React.useState<string | null>(null)
     const [uploadedFiles, setUploadedFiles] = React.useState<Array<{
         id: string
         name: string
@@ -27,7 +22,8 @@ export function InsightsTab({ dataSummary, plotSummary }: InsightsTabProps) {
     }>>([])
 
     const generateReport = () => {
-        setInitialMessage("Please analyze the provided dataset and generate a structured report with the following sections:\n1. Executive Summary\n2. Key Trends\n3. Anomalies\n4. Recommendations")
+        openSidebar()
+        // You can optionally trigger a message in the AI chat here later
     }
 
     const handleFileUpload = async (files: FileList) => {
@@ -124,13 +120,25 @@ export function InsightsTab({ dataSummary, plotSummary }: InsightsTabProps) {
                 </CardContent>
             </Card>
 
-            <div className="flex-1 overflow-hidden border rounded-lg bg-white shadow-sm min-h-[400px]">
-                <ResearchAIChat
-                    context={context}
-                    fullScreen
-                    initialUserMessage={initialMessage || undefined}
-                />
-            </div>
+            {/* AI Chat Trigger */}
+            <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+                <CardContent className="py-6">
+                    <div className="text-center">
+                        <Sparkles className="h-8 w-8 mx-auto mb-3 text-purple-600" />
+                        <h3 className="font-semibold text-lg mb-2">Ask AI About These Insights</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Open the AI assistant to discuss trends, anomalies, and recommendations
+                        </p>
+                        <Button
+                            onClick={openSidebar}
+                            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Open AI Assistant
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 }
