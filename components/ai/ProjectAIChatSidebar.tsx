@@ -68,7 +68,7 @@ export function ProjectAIChatSidebar() {
         onClick={toggleSidebar}
         className={buttonClasses}
       >
-        <Sparkles className="h-5 w-5" />
+        <Sparkles className="h-10 w-10" />
       </button>
     </>
   )
