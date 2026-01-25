@@ -10,8 +10,8 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
  */
 export async function runChatMaintenance(projectId: string) {
   try {
-    // Prune old messages (keep last 100)
-    const pruned = await chatMemoryService.pruneOldMessages(projectId, 100)
+    // Prune old messages (keep last 50)
+    const pruned = await chatMemoryService.pruneOldMessages(projectId, 50)
     
     // Check if summary needs refresh
     const messageCount = await chatMemoryService.getMessageCount(projectId)

@@ -100,7 +100,7 @@ export const chatMemoryService = {
   /**
    * Delete old messages, keeping only the most recent N
    */
-  async pruneOldMessages(projectId: string, keepLast: number = 100) {
+  async pruneOldMessages(projectId: string, keepLast: number = 50) {
     const messages = await prisma.chatMessage.findMany({
       where: { projectId },
       orderBy: { createdAt: 'desc' },
