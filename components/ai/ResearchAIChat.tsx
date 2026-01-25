@@ -402,7 +402,7 @@ export function ResearchAIChat({ projectId, context, fullScreen = false, initial
                 }
               }}
               placeholder="Ask about your data, plots, or get research suggestions... (Shift+Enter for new line)"
-              className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto min-h-[20px] max-h-[200px] leading-5"
+              className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto min-h-[40px] max-h-[200px] leading-5"
               disabled={isLoading}
               rows={1}
             />
