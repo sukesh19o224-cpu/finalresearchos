@@ -111,7 +111,7 @@ export const chatMemoryService = {
     if (messages.length > 0) {
       await prisma.chatMessage.deleteMany({
         where: {
-          id: { in: messages.map(m => m.id) }
+          id: { in: messages.map((m: any) => m.id) }
         }
       })
     }

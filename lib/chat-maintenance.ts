@@ -45,7 +45,7 @@ export async function summarizeConversation(projectId: string) {
     messages.reverse()
 
     // Build conversation text
-    const conversationText = messages.map(m => 
+    const conversationText = messages.map((m: any) => 
       `${m.role}: ${m.content}`
     ).join('\n')
 
