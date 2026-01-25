@@ -239,15 +239,20 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
             <Switch id="internet-search" checked={includeSearch} onCheckedChange={setIncludeSearch} />
             <Label htmlFor="internet-search" className="text-xs text-gray-500">Search internet for papers</Label>
           </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
+          <div className="flex items-end gap-2">
+            <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              placeholder="Ask about your data, plots, or get research suggestions..."
-              className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  sendMessage()
+                }
+              }}
+              placeholder="Ask about your data, plots, or get research suggestions... (Shift+Enter for new line)"
+              className="flex-1 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none overflow-y-auto min-h-[44px] max-h-[200px] leading-5"
               disabled={isLoading}
+              rows={1}
             />
             <Button onClick={sendMessage} disabled={!input.trim() || isLoading}>
               {isLoading ? (
