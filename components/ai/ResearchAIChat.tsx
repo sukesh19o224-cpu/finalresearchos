@@ -49,7 +49,7 @@ export function ResearchAIChat({ context, fullScreen = false, initialUserMessage
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hello! I\'m your AI research assistant powered by Llama 3.1. I can help you analyze data, interpret plots, refine experimental ideas, and suggest next steps. How can I assist with your research today?',
+      content: 'Hello! I\'m your AI research assistant. I can help you analyze data, interpret plots, refine experimental ideas, and suggest next steps. How can I assist with your research today?',
       timestamp: new Date(),
     },
   ])
