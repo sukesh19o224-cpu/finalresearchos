@@ -1,9 +1,9 @@
 // Groq API Integration for Llama 3.1 8B
-// Vercel Edge Function compatible
+// Node.js Runtime for better environment variable support
 
 import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'edge' // Use Vercel Edge Runtime for low latency
+export const runtime = 'nodejs' // Use Node.js Runtime for reliable env var loading
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
@@ -24,6 +24,9 @@ export interface GroqChatRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    // Debug: Log API key status
+    console.log('🔑 GROQ_API_KEY status:', GROQ_API_KEY ? 'LOADED ✓' : 'MISSING ✗')
+    
     // Check if GROQ_API_KEY is set
     if (!GROQ_API_KEY) {
       console.error('GROQ_API_KEY is not configured')
