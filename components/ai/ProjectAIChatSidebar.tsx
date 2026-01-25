@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useProjectAIChat } from '@/lib/hooks/useProjectAIChat'
 import { ResearchAIChat } from './ResearchAIChat'
 import { Button } from '@/components/ui/button'
-import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Sparkles, ChevronRight } from 'lucide-react'
 
 export function ProjectAIChatSidebar() {
   const { isOpen, closeSidebar, openSidebar, toggleSidebar } = useProjectAIChat()
@@ -25,7 +25,7 @@ export function ProjectAIChatSidebar() {
   }, [isOpen, closeSidebar])
 
   // Toggle button position classes
-  const baseClasses = 'fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 rounded-l-lg rounded-r-none shadow-lg'
+  const baseClasses = 'fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 rounded-l-lg rounded-r-none shadow-lg bg-gradient-to-b from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0'
   const positionClass = isOpen ? 'right-[400px]' : 'right-0'
   const buttonClasses = `${baseClasses} ${positionClass}`
 
@@ -64,14 +64,12 @@ export function ProjectAIChatSidebar() {
       </div>
 
       {/* Toggle Button - Always visible, peeks out from edge */}
-      <Button
+      <button
         onClick={toggleSidebar}
         className={buttonClasses}
-        size="sm"
-        variant="default"
       >
-        {isOpen ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-      </Button>
+        <Sparkles className="h-4 w-4" />
+      </button>
     </>
   )
 }
