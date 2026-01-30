@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Upload, Plus, Trash2 } from 'lucide-react'
-import * as XLSX from 'xlsx'
 
 declare global {
   interface Window {
     jspreadsheet: any
+    XLSX: any
   }
 }
 
@@ -30,6 +30,11 @@ export function VisualizationTab() {
     jsuitesLink.href = 'https://cdn.jsdelivr.net/npm/jsuites@4.15.0/dist/jsuites.min.css'
     document.head.appendChild(jsuitesLink)
 
+    // Load XLSX library from CDN
+    const xlsxScript = document.createElement('script')
+    xlsxScript.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+    xlsxScript.async = true
+
     // Load Jsuites JS
     const jsuitesScript = document.createElement('script')
     jsuitesScript.src = 'https://cdn.jsdelivr.net/npm/jsuites@4.15.0/dist/jsuites.min.js'
@@ -39,6 +44,12 @@ export function VisualizationTab() {
     const script = document.createElement('script')
     script.src = 'https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4.13.1/dist/index.min.js'
     script.async = true
+
+    document.head.appendChild(xlsxScript)
+    
+    xlsxScript.onload = () => {
+      document.head.appendChild(jsuitesScript)
+    }
 
     jsuitesScript.onload = () => {
       document.head.appendChild(script)
@@ -70,8 +81,6 @@ export function VisualizationTab() {
       }
     }
 
-    document.head.appendChild(jsuitesScript)
-
     return () => {
       // Cleanup
       if (jspreadsheet) {
@@ -86,7 +95,7 @@ export function VisualizationTab() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !window.XLSX) return
 
     try {
       const reader = new FileReader()
@@ -94,10 +103,10 @@ export function VisualizationTab() {
       reader.onload = (event) => {
         try {
           const data = event.target?.result
-          const workbook = XLSX.read(data, { type: 'binary' })
+          const workbook = window.XLSX.read(data, { type: 'binary' })
           const sheetName = workbook.SheetNames[0]
           const sheet = workbook.Sheets[sheetName]
-          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][]
+          const jsonData = window.XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][]
 
           if (jsonData.length === 0) {
             alert('Empty file')
