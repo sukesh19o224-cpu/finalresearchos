@@ -246,16 +246,8 @@ export function VisualizationTab() {
 
   const handleDeleteColumn = () => {
     if (jspreadsheet) {
-      const selected = jspreadsheet.getSelected()
-      if (selected && selected.length > 0) {
-        // Get the column index from the selection
-        // selected format is [x1, y1, x2, y2]
-        const columnIndex = selected[0]
-        // Delete the column at the specified index
-        jspreadsheet.deleteColumn(1, columnIndex)
-      } else {
-        alert('Please select a column to delete by clicking on a cell in that column')
-      }
+      // Simply call deleteColumn - it deletes the currently selected column
+      jspreadsheet.deleteColumn()
     }
   }
 
