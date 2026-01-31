@@ -63,7 +63,7 @@ export function Breadcrumbs() {
   })
 
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="relative mb-6">
       <nav className="flex items-center space-x-1 text-sm text-gray-600 dark:text-gray-400">
         <Link
           href="/dashboard"
@@ -96,7 +96,7 @@ export function Breadcrumbs() {
       </nav>
       
       {isProjectDetail && (
-        <div className="flex items-center gap-32">
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 flex items-center gap-[30px]">
           <button
             onClick={() => setActiveView('overview')}
             className={`px-6 py-2.5 rounded-lg font-semibold text-sm transition-all ${
