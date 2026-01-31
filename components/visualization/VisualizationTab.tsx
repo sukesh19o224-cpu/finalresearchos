@@ -410,10 +410,10 @@ export function VisualizationTab() {
       <div id="split-container" className="flex-1 flex overflow-hidden">
         {/* Left Panel - Spreadsheet */}
         <div 
-          className="overflow-auto border-r"
+          className="overflow-x-auto overflow-y-auto border-r"
           style={{ width: `${leftWidth}%` }}
         >
-          <div className="p-4">
+          <div className="p-4 min-w-max">
             <div ref={spreadsheetRef} />
           </div>
         </div>
