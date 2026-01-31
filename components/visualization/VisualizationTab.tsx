@@ -34,7 +34,6 @@ declare global {
 export function VisualizationTab() {
   const spreadsheetRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const dividerRef = useRef<HTMLDivElement>(null)
   const [jspreadsheet, setJspreadsheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showHeaderDialog, setShowHeaderDialog] = useState(false)
@@ -42,8 +41,6 @@ export function VisualizationTab() {
     headers: any[]
     rows: any[][]
   } | null>(null)
-  const [leftWidth, setLeftWidth] = useState(50) // Percentage
-  const [isDragging, setIsDragging] = useState(false)
   const [selectedColumns, setSelectedColumns] = useState<number[]>([])
   const [plotData, setPlotData] = useState<any>(null)
   const [plotType, setPlotType] = useState<'scatter' | 'line' | 'bar' | 'scatter+line'>('scatter')
@@ -53,6 +50,7 @@ export function VisualizationTab() {
   const [yAxisTitle, setYAxisTitle] = useState('Y Axis')
   const [plotTitle, setPlotTitle] = useState('Data Plot')
   const [showLegend, setShowLegend] = useState(true)
+  const [showGrid, setShowGrid] = useState(false)
   const [fontSize, setFontSize] = useState(12)
   const [fontBold, setFontBold] = useState(false)
   const [fontItalic, setFontItalic] = useState(false)
@@ -101,13 +99,13 @@ export function VisualizationTab() {
       if (spreadsheetRef.current && window.jspreadsheet) {
         // Initialize with default empty spreadsheet
         const table = window.jspreadsheet(spreadsheetRef.current, {
-          data: Array(20).fill(null).map(() => Array(10).fill('')),
-          columns: Array(10).fill(null).map((_, i) => ({
+          data: Array(20).fill(null).map(() => Array(26).fill('')),
+          columns: Array(26).fill(null).map((_, i) => ({
             type: 'text',
-            title: String.fromCharCode(65 + i), // A, B, C, etc.
+            title: String.fromCharCode(65 + i), // A-Z
             width: 120
           })),
-          minDimensions: [10, 20],
+          minDimensions: [26, 20],
           allowInsertRow: true,
           allowInsertColumn: true,
           allowDeleteRow: true,
@@ -285,42 +283,6 @@ export function VisualizationTab() {
     }
   }
 
-  // Handle resizable divider
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return
-      
-      const container = document.getElementById('split-container')
-      if (!container) return
-      
-      const containerRect = container.getBoundingClientRect()
-      const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100
-      
-      // Constrain between 20% and 80%
-      if (newLeftWidth >= 20 && newLeftWidth <= 80) {
-        setLeftWidth(newLeftWidth)
-      }
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false)
-    }
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isDragging])
-
-  const handleDividerMouseDown = () => {
-    setIsDragging(true)
-  }
-
   const updateSelectedColumns = (instance: any, x1: number, y1: number, x2: number, y2: number) => {
     const cols = []
     for (let i = Math.min(x1, x2); i <= Math.max(x1, x2); i++) {
@@ -380,7 +342,6 @@ export function VisualizationTab() {
 
     const fontFamily = 'Arial, sans-serif'
     const fontWeight = fontBold ? 'bold' : 'normal'
-    const fontStyle = fontItalic ? 'italic' : 'normal'
 
     setPlotData({
       data: [trace],
@@ -393,21 +354,48 @@ export function VisualizationTab() {
             weight: fontWeight,
           },
         },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white',
         xaxis: {
           title: {
             text: xAxisTitle,
             font: { size: fontSize, family: fontFamily, weight: fontWeight },
           },
+          showline: true,
+          linecolor: '#000000',
+          linewidth: 2,
+          ticks: 'outside',
+          showgrid: showGrid,
+          gridcolor: '#e5e5e5',
+          mirror: false,
         },
         yaxis: {
           title: {
             text: yAxisTitle,
             font: { size: fontSize, family: fontFamily, weight: fontWeight },
           },
+          showline: true,
+          linecolor: '#000000',
+          linewidth: 2,
+          ticks: 'outside',
+          showgrid: showGrid,
+          gridcolor: '#e5e5e5',
+          mirror: false,
         },
         showlegend: showLegend,
-        legend: { font: { size: fontSize - 2 } },
+        legend: {
+          font: { size: fontSize - 2 },
+          orientation: 'v',
+          x: 1,
+          y: 1,
+          xanchor: 'right',
+          yanchor: 'top',
+          bgcolor: 'rgba(255,255,255,0.8)',
+          bordercolor: '#cccccc',
+          borderwidth: 1,
+        },
         autosize: true,
+        margin: { l: 60, r: 20, t: 60, b: 60 },
       },
       config: { responsive: true },
     })
@@ -426,7 +414,7 @@ export function VisualizationTab() {
       const yLabel = headers[yCol] || `Column ${yCol + 1}`
       generatePlot(xData, yData, xLabel, yLabel)
     }
-  }, [plotType, markerSize, markerColor, xAxisTitle, yAxisTitle, plotTitle, showLegend, fontSize, fontBold, fontItalic, fontUnderline])
+  }, [plotType, markerSize, markerColor, xAxisTitle, yAxisTitle, plotTitle, showLegend, showGrid, fontSize, fontBold, fontItalic, fontUnderline])
 
   if (isLoading) {
     return (
@@ -556,32 +544,12 @@ export function VisualizationTab() {
         </div>
       </div>
 
-      {/* Split Container */}
-      <div id="split-container" className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Spreadsheet */}
+      {/* Split Container - Fixed 50/50 */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel - Plot Visualization */}
         <div 
-          className="overflow-x-auto overflow-y-auto border-r"
-          style={{ width: `${leftWidth}%` }}
-        >
-          <div className="p-4 min-w-max">
-            <div ref={spreadsheetRef} />
-          </div>
-        </div>
-
-        {/* Resizable Divider */}
-        <div
-          ref={dividerRef}
-          className="w-1 bg-gray-300 hover:bg-blue-500 cursor-col-resize transition-colors relative group"
-          onMouseDown={handleDividerMouseDown}
-          style={{ userSelect: 'none' }}
-        >
-          <div className="absolute inset-y-0 -left-1 -right-1" />
-        </div>
-
-        {/* Right Panel - Plot Visualization */}
-        <div 
-          className="overflow-auto bg-gray-50 flex flex-col"
-          style={{ width: `${100 - leftWidth}%` }}
+          className="overflow-auto bg-gray-50 flex flex-col border-r"
+          style={{ width: '50%' }}
         >
           {/* Plot Area */}
           <div className="flex-1 overflow-auto">
@@ -711,6 +679,20 @@ export function VisualizationTab() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Grid */}
+                <div className="space-y-2">
+                  <Label className="text-xs">Show Grid</Label>
+                  <Select value={showGrid ? 'true' : 'false'} onValueChange={(v) => setShowGrid(v === 'true')}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Font Style Options */}
@@ -743,6 +725,16 @@ export function VisualizationTab() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Right Panel - Spreadsheet */}
+        <div 
+          className="overflow-x-auto overflow-y-auto"
+          style={{ width: '50%' }}
+        >
+          <div className="p-4 min-w-max">
+            <div ref={spreadsheetRef} />
+          </div>
         </div>
       </div>
     </div>
