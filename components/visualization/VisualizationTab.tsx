@@ -55,6 +55,8 @@ export function VisualizationTab() {
   const [fontBold, setFontBold] = useState(false)
   const [fontItalic, setFontItalic] = useState(false)
   const [fontUnderline, setFontUnderline] = useState(false)
+  const [xTickCount, setXTickCount] = useState<number>(10)
+  const [yTickCount, setYTickCount] = useState<number>(10)
 
   useEffect(() => {
     // Load Jspreadsheet CSS
@@ -356,6 +358,8 @@ export function VisualizationTab() {
         },
         plot_bgcolor: 'white',
         paper_bgcolor: 'white',
+        width: 600,
+        height: 600,
         xaxis: {
           title: {
             text: xAxisTitle,
@@ -368,6 +372,8 @@ export function VisualizationTab() {
           showgrid: showGrid,
           gridcolor: '#e5e5e5',
           mirror: false,
+          zeroline: false,
+          nticks: xTickCount,
         },
         yaxis: {
           title: {
@@ -381,6 +387,9 @@ export function VisualizationTab() {
           showgrid: showGrid,
           gridcolor: '#e5e5e5',
           mirror: false,
+          zeroline: false,
+          nticks: yTickCount,
+          scaleanchor: 'x',
         },
         showlegend: showLegend,
         legend: {
@@ -394,10 +403,10 @@ export function VisualizationTab() {
           bordercolor: '#cccccc',
           borderwidth: 1,
         },
-        autosize: true,
+        autosize: false,
         margin: { l: 60, r: 20, t: 60, b: 60 },
       },
-      config: { responsive: true },
+      config: { responsive: false },
     })
   }
 
@@ -414,7 +423,7 @@ export function VisualizationTab() {
       const yLabel = headers[yCol] || `Column ${yCol + 1}`
       generatePlot(xData, yData, xLabel, yLabel)
     }
-  }, [plotType, markerSize, markerColor, xAxisTitle, yAxisTitle, plotTitle, showLegend, showGrid, fontSize, fontBold, fontItalic, fontUnderline])
+  }, [plotType, markerSize, markerColor, xAxisTitle, yAxisTitle, plotTitle, showLegend, showGrid, fontSize, fontBold, fontItalic, fontUnderline, xTickCount, yTickCount])
 
   if (isLoading) {
     return (
@@ -546,9 +555,19 @@ export function VisualizationTab() {
 
       {/* Split Container - Fixed 50/50 */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Plot Visualization */}
+        {/* Left Panel - Spreadsheet */}
         <div 
-          className="overflow-auto bg-gray-50 flex flex-col border-r"
+          className="overflow-x-auto overflow-y-auto border-r"
+          style={{ width: '50%' }}
+        >
+          <div className="p-4 min-w-max">
+            <div ref={spreadsheetRef} />
+          </div>
+        </div>
+
+        {/* Right Panel - Plot Visualization */}
+        <div 
+          className="overflow-auto bg-gray-50 flex flex-col"
           style={{ width: '50%' }}
         >
           {/* Plot Area */}
@@ -693,6 +712,32 @@ export function VisualizationTab() {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* X-Tick Count */}
+                <div className="space-y-2">
+                  <Label className="text-xs">X-Tick Count</Label>
+                  <Input
+                    type="number"
+                    value={xTickCount}
+                    onChange={(e) => setXTickCount(Number(e.target.value))}
+                    min={2}
+                    max={20}
+                    className="h-8 text-xs"
+                  />
+                </div>
+
+                {/* Y-Tick Count */}
+                <div className="space-y-2">
+                  <Label className="text-xs">Y-Tick Count</Label>
+                  <Input
+                    type="number"
+                    value={yTickCount}
+                    onChange={(e) => setYTickCount(Number(e.target.value))}
+                    min={2}
+                    max={20}
+                    className="h-8 text-xs"
+                  />
+                </div>
               </div>
 
               {/* Font Style Options */}
@@ -725,16 +770,6 @@ export function VisualizationTab() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Right Panel - Spreadsheet */}
-        <div 
-          className="overflow-x-auto overflow-y-auto"
-          style={{ width: '50%' }}
-        >
-          <div className="p-4 min-w-max">
-            <div ref={spreadsheetRef} />
-          </div>
         </div>
       </div>
     </div>
