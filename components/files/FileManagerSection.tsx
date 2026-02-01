@@ -61,6 +61,8 @@ export function FileManagerSection({ projectId }: FileManagerSectionProps) {
     await createFolder(folderName.trim(), parentId)
     setFolderName('')
     setShowFolderDialog(false)
+    // Refetch files to show the newly created folder
+    await fetchFiles()
   }
   
   const handleDelete = async () => {
@@ -76,6 +78,8 @@ export function FileManagerSection({ projectId }: FileManagerSectionProps) {
     
     if (confirm(message)) {
       await deleteNode(selectedNodeId)
+      // Refetch files to update the display
+      await fetchFiles()
     }
   }
   
