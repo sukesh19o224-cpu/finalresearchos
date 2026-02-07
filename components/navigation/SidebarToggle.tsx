@@ -6,18 +6,19 @@ import { Button } from '@/components/ui/button'
 interface SidebarToggleProps {
   isOpen: boolean
   onToggle: () => void
+  sidebarWidth?: number
+  isResizing?: boolean
 }
 
-export function SidebarToggle({ isOpen, onToggle }: SidebarToggleProps) {
-  // Pre-compute classes
-  const baseClasses = 'fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 rounded-r-lg rounded-l-none shadow-lg'
-  const positionClass = isOpen ? 'left-64' : 'left-0'
-  const buttonClasses = baseClasses + ' ' + positionClass
-
+export function SidebarToggle({ isOpen, onToggle, sidebarWidth = 280, isResizing = false }: SidebarToggleProps) {
   return (
     <Button
       onClick={onToggle}
-      className={buttonClasses}
+      className="fixed top-1/2 -translate-y-1/2 z-50 rounded-r-lg rounded-l-none shadow-lg"
+      style={{
+        left: isOpen ? `${sidebarWidth}px` : '0px',
+        transition: isResizing ? 'none' : 'left 300ms ease-in-out',
+      }}
       size="sm"
       variant="default"
     >

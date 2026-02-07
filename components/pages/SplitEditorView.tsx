@@ -77,24 +77,20 @@ export function SplitEditorView({ projectId }: SplitEditorViewProps) {
         {isSplit && (
           <div className="w-1/2 flex flex-col">
             {splitPageId ? (
-              <>
-                <div className="flex items-center justify-end px-3 py-1 border-b bg-gray-50">
-                  <button
-                    onClick={() => setSplitPageId(null)}
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-200"
-                    title="Close this panel"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-                <div className="flex-1">
-                  <YooptaPageEditor
-                    key={splitPageId}
-                    pageId={splitPageId}
-                    projectId={projectId}
-                  />
-                </div>
-              </>
+              <div className="flex-1 relative">
+                <YooptaPageEditor
+                  key={splitPageId}
+                  pageId={splitPageId}
+                  projectId={projectId}
+                />
+                <button
+                  onClick={() => setSplitPageId(null)}
+                  className="absolute top-2.5 right-3 p-1 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-200 z-10"
+                  title="Close this panel"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center bg-gray-50/50">
                 <p className="text-sm text-gray-500 mb-4 font-medium">Open a page</p>

@@ -29,6 +29,8 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true)
   const activeView = searchParams.get('view') || 'overview'
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(280)
+  const [sidebarResizing, setSidebarResizing] = useState(false)
 
   const setActiveView = (view: string) => {
     router.push(`/projects/${projectId}?view=${view}`, { scroll: false })
@@ -140,12 +142,16 @@ export default function ProjectDetailPage() {
           navigationItems={navigationItems}
           researchTools={researchTools}
           onOpenChange={setSidebarOpen}
+          onWidthChange={setSidebarWidth}
+          onResizingChange={setSidebarResizing}
           projectId={projectId}
         />
 
         <SidebarToggle
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
+          sidebarWidth={sidebarWidth}
+          isResizing={sidebarResizing}
         />
 
         <div className="flex-1 transition-all duration-300 ml-0">

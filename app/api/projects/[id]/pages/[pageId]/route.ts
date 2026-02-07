@@ -69,6 +69,7 @@ export async function PATCH(
     const updateData: any = {}
     if (body.title !== undefined) updateData.title = body.title
     if (body.icon !== undefined) updateData.icon = body.icon
+    if (body.position !== undefined) updateData.position = body.position
 
     // If content is being saved, merge into properties
     if (body.content !== undefined) {

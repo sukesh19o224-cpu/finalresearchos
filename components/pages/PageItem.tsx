@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { FileText, ChevronRight, ChevronDown, Trash2 } from 'lucide-react'
+import { FileText, ChevronRight, ChevronDown, Trash2, GripVertical, ArrowUp, ArrowDown } from 'lucide-react'
 import { usePageStore, type PageNode } from '@/lib/stores/pageStore'
 
 interface PageItemProps {
@@ -10,7 +10,7 @@ interface PageItemProps {
 }
 
 export function PageItem({ page, depth }: PageItemProps) {
-  const { pages, selectedPageId, selectPage, toggleExpand, renamePage, deletePage } = usePageStore()
+  const { pages, selectedPageId, selectPage, toggleExpand, renamePage, deletePage, movePage } = usePageStore()
   const [isRenaming, setIsRenaming] = useState(false)
   const [renameValue, setRenameValue] = useState(page.title)
   const [isHovering, setIsHovering] = useState(false)
@@ -62,10 +62,20 @@ export function PageItem({ page, depth }: PageItemProps) {
     toggleExpand(page.id)
   }
 
+  const handleMoveUp = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    movePage(page.id, 'up')
+  }
+
+  const handleMoveDown = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    movePage(page.id, 'down')
+  }
+
   return (
     <>
       <div
-        className={`flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors ${
+        className={`group flex items-center gap-1 px-2 py-1.5 rounded-md cursor-pointer text-sm transition-colors ${
           isSelected ? 'bg-blue-100 text-blue-800' : 'text-gray-700 hover:bg-gray-100'
         }`}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
@@ -103,12 +113,29 @@ export function PageItem({ page, depth }: PageItemProps) {
         )}
 
         {isHovering && !isRenaming && (
-          <button
-            onClick={handleDelete}
-            className="flex-shrink-0 p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-600"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            <button
+              onClick={handleMoveUp}
+              className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+              title="Move up"
+            >
+              <ArrowUp className="h-3 w-3" />
+            </button>
+            <button
+              onClick={handleMoveDown}
+              className="p-0.5 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-600"
+              title="Move down"
+            >
+              <ArrowDown className="h-3 w-3" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-600"
+              title="Delete"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
         )}
       </div>
 

@@ -25,6 +25,9 @@ type PageStore = {
   renamePage: (id: string, newTitle: string) => Promise<void>
   deletePage: (id: string) => Promise<void>
 
+  // Reorder
+  movePage: (id: string, direction: 'up' | 'down') => void
+
   // Split view
   toggleSplit: () => void
   setSplitPageId: (id: string | null) => void
@@ -171,4 +174,38 @@ export const usePageStore = create<PageStore>((set, get) => ({
   },
 
   setSplitPageId: (id) => set({ splitPageId: id }),
+
+  movePage: (id, direction) => {
+    const { pages, projectId } = get()
+    const page = pages[id]
+    if (!page || !projectId) return
+
+    const siblings = Object.values(pages)
+      .filter((p) => p.parentPageId === page.parentPageId)
+      .sort((a, b) => a.position - b.position)
+
+    const idx = siblings.findIndex((p) => p.id === id)
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= siblings.length) return
+
+    const other = siblings[swapIdx]
+    const newPages = {
+      ...pages,
+      [id]: { ...page, position: other.position },
+      [other.id]: { ...other, position: page.position },
+    }
+    set({ pages: newPages })
+
+    // Persist both position changes
+    fetch(`/api/projects/${projectId}/pages/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ position: other.position }),
+    }).catch(() => {})
+    fetch(`/api/projects/${projectId}/pages/${other.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ position: page.position }),
+    }).catch(() => {})
+  },
 }))

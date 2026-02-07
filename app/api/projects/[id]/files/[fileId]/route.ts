@@ -21,13 +21,16 @@ export async function PATCH(
   { params }: { params: { id: string; fileId: string } }
 ) {
   try {
-    const { name } = await req.json()
-    
+    const body = await req.json()
+    const updateData: any = {}
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.parentId !== undefined) updateData.parentId = body.parentId || null
+
     const updated = await prisma.file.update({
       where: { id: params.fileId },
-      data: { name },
+      data: updateData,
     })
-    
+
     return NextResponse.json(updated)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update file' }, { status: 500 })

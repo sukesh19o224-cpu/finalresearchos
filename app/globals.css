@@ -404,3 +404,11 @@
     margin: 0;
   }
 }
+
+/* react-arborist tree overrides */
+.react-arborist-tree [role="treeitem"] {
+  outline: none;
+}
+.react-arborist-tree [role="treeitem"]:focus {
+  outline: none;
+}

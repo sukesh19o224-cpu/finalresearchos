@@ -27,6 +27,8 @@ interface ProjectSidebarProps {
   navigationItems: NavigationItem[]
   researchTools: ResearchTool[]
   onOpenChange?: (open: boolean) => void
+  onWidthChange?: (width: number) => void
+  onResizingChange?: (resizing: boolean) => void
   projectId: string
 }
 
@@ -37,6 +39,8 @@ export function ProjectSidebar({
   navigationItems,
   researchTools,
   onOpenChange,
+  onWidthChange,
+  onResizingChange,
   projectId,
 }: ProjectSidebarProps) {
   const [isHovering, setIsHovering] = useState(false)
@@ -61,7 +65,8 @@ export function ProjectSidebar({
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     setIsResizing(true)
-  }, [])
+    if (onResizingChange) onResizingChange(true)
+  }, [onResizingChange])
 
   useEffect(() => {
     if (!isResizing) return
@@ -69,10 +74,12 @@ export function ProjectSidebar({
     const handleMouseMove = (e: MouseEvent) => {
       const newWidth = Math.min(Math.max(e.clientX, 200), 600)
       setSidebarWidth(newWidth)
+      if (onWidthChange) onWidthChange(newWidth)
     }
 
     const handleMouseUp = () => {
       setIsResizing(false)
+      if (onResizingChange) onResizingChange(false)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -99,13 +106,13 @@ export function ProjectSidebar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col h-full">
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {/* Editor Pages Section */}
-          <PageManagerSection projectId={projectId} />
-
           {/* File Manager Section */}
           <FileManagerSection projectId={projectId} />
+
+          {/* Editor Pages Section */}
+          <PageManagerSection projectId={projectId} />
 
           {/* Research Tools - Moved to bottom */}
           <div className="pt-6 mt-6 border-t">
