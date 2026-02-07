@@ -98,7 +98,7 @@ export function ProjectSidebar({
   return (
     <div
       ref={sidebarRef}
-      className="fixed left-0 top-0 h-full bg-white border-r shadow-lg transition-all ease-in-out z-50"
+      className="fixed left-0 top-0 h-full bg-white border-r shadow-lg transition-all ease-in-out z-50 overflow-hidden"
       style={{
         width: shouldShow ? `${sidebarWidth}px` : '0px',
         transitionDuration: isResizing ? '0ms' : '300ms',
@@ -106,7 +106,7 @@ export function ProjectSidebar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full" style={{ minWidth: `${sidebarWidth}px` }}>
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {/* File Manager Section */}
           <FileManagerSection projectId={projectId} />
