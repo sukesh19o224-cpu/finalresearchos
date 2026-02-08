@@ -13,7 +13,6 @@ import { LabNotebook } from '@/components/notebook/LabNotebook'
 import { ExportPanel } from '@/components/export/ExportPanel'
 import { Users, BookOpen, Download } from 'lucide-react'
 import { ProjectSidebar } from '@/components/navigation/ProjectSidebar'
-import { SidebarToggle } from '@/components/navigation/SidebarToggle'
 import { ProjectAIChatProvider } from '@/lib/hooks/useProjectAIChat'
 import { ProjectAIChatSidebar } from '@/components/ai/ProjectAIChatSidebar'
 import { AnalysisPage } from '@/components/analysis/AnalysisPage'
@@ -28,8 +27,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const activeView = searchParams.get('view') || 'overview'
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarWidth, setSidebarWidth] = useState(280)
+  const [sidebarWidth, setSidebarWidth] = useState(64)
   const [sidebarResizing, setSidebarResizing] = useState(false)
 
   const setActiveView = (view: string) => {
@@ -141,22 +139,18 @@ export default function ProjectDetailPage() {
           onViewChange={setActiveView}
           navigationItems={navigationItems}
           researchTools={researchTools}
-          onOpenChange={setSidebarOpen}
           onWidthChange={setSidebarWidth}
           onResizingChange={setSidebarResizing}
           projectId={projectId}
         />
 
-        <SidebarToggle
-          isOpen={sidebarOpen}
-          onToggle={() => setSidebarOpen(!sidebarOpen)}
-          sidebarWidth={sidebarWidth}
-          isResizing={sidebarResizing}
-        />
-
-        <div className="flex-1 transition-all duration-300 ml-0">
-          <div className="h-full overflow-y-auto">
-            <div className="p-8">
+        <div 
+          className="flex-1 overflow-y-auto transition-all"
+          style={{
+            transitionDuration: sidebarResizing ? '0ms' : '200ms',
+          }}
+        >
+          <div className="h-full
               {activeView === 'overview' && (
                 <div className="mb-8">
                   <h1 className="text-3xl font-bold mb-2">{project.title}</h1>
