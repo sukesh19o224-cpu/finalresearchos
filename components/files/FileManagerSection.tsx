@@ -388,9 +388,25 @@ export function FileManagerSection({ projectId }: FileManagerSectionProps) {
     }
   }
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = async () => {
     const tree = treeRef.current
-    if (!tree) return
+    // If tree is not rendered (empty state), create folder directly via API
+    if (!tree) {
+      try {
+        const res = await fetch(`/api/projects/${projectId}/files/folders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'New Folder', parentId: null }),
+        })
+        if (res.ok) {
+          const folder = await res.json()
+          useFileManagerStore.getState().addFile(folder)
+        }
+      } catch (error) {
+        console.error('Failed to create folder:', error)
+      }
+      return
+    }
     const selected = tree.selectedNodes[0]
     const parentId = selected?.data.isFolder ? selected.id : selected?.parent?.id || null
     tree.create({ type: 'internal', parentId, index: 0 })
