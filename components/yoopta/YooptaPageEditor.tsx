@@ -118,7 +118,6 @@ export function YooptaPageEditor({ pageId, projectId }: YooptaPageEditorProps) {
     currentPageIdRef.current = pageId
     setIsLoading(true)
     setValue(undefined)
-    setLastSaved(null)
 
     const loadContent = async () => {
       try {
