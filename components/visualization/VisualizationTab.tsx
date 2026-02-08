@@ -23,20 +23,24 @@ import { Label } from '@/components/ui/label'
 import dynamic from 'next/dynamic'
 import { useDatasetStore } from '@/lib/stores/datasetStore'
 import { useVisualizationStore } from '@/lib/stores/visualizationStore'
+import {
+  convertToXSpreadsheetFormat,
+  convertFromXSpreadsheetFormat,
+} from '@/lib/utils/spreadsheet-converter'
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false })
 
 declare global {
   interface Window {
-    jspreadsheet: any
     XLSX: any
+    x_spreadsheet: any
   }
 }
 
 export function VisualizationTab() {
   const spreadsheetRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [jspreadsheet, setJspreadsheet] = useState<any>(null)
+  const [spreadsheet, setSpreadsheet] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showHeaderDialog, setShowHeaderDialog] = useState(false)
   const [pendingFileData, setPendingFileData] = useState<{
@@ -84,134 +88,141 @@ export function VisualizationTab() {
     setYTickCount,
   } = useVisualizationStore()
 
+  // Load XLSX library from CDN
   useEffect(() => {
-    // Load Jspreadsheet CSS
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = 'https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4.13.1/dist/jspreadsheet.min.css'
-    document.head.appendChild(link)
-
-    // Load Jsuites CSS (required dependency)
-    const jsuitesLink = document.createElement('link')
-    jsuitesLink.rel = 'stylesheet'
-    jsuitesLink.href = 'https://cdn.jsdelivr.net/npm/jsuites@4.15.0/dist/jsuites.min.css'
-    document.head.appendChild(jsuitesLink)
-
-    // Load XLSX library from CDN
     const xlsxScript = document.createElement('script')
     xlsxScript.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
     xlsxScript.async = true
 
-    // Load Jsuites JS
-    const jsuitesScript = document.createElement('script')
-    jsuitesScript.src = 'https://cdn.jsdelivr.net/npm/jsuites@4.15.0/dist/jsuites.min.js'
-    jsuitesScript.async = true
+    xlsxScript.onload = () => {
+      // Load x-spreadsheet CSS
+      const xsCSS = document.createElement('link')
+      xsCSS.rel = 'stylesheet'
+      xsCSS.href = 'https://unpkg.com/x-data-spreadsheet@1.1.9/dist/xspreadsheet.css'
+      document.head.appendChild(xsCSS)
 
-    // Load Jspreadsheet JS after Jsuites
-    const script = document.createElement('script')
-    script.src = 'https://cdn.jsdelivr.net/npm/jspreadsheet-ce@4.13.1/dist/index.min.js'
-    script.async = true
+      // Load x-spreadsheet JS
+      const xsScript = document.createElement('script')
+      xsScript.src = 'https://unpkg.com/x-data-spreadsheet@1.1.9/dist/xspreadsheet.js'
+      xsScript.async = true
+      
+      xsScript.onload = () => {
+        setIsLoading(false)
+      }
+      
+      document.head.appendChild(xsScript)
+    }
 
     document.head.appendChild(xlsxScript)
-    
-    xlsxScript.onload = () => {
-      document.head.appendChild(jsuitesScript)
-    }
-
-    jsuitesScript.onload = () => {
-      document.head.appendChild(script)
-    }
-
-    script.onload = () => {
-      setIsLoading(false)
-      if (spreadsheetRef.current && window.jspreadsheet) {
-        // Restore from store if data exists, otherwise initialize empty
-        if (spreadsheetData && storedHeaders) {
-          const table = window.jspreadsheet(spreadsheetRef.current, {
-            data: spreadsheetData,
-            columns: storedHeaders.map((header) => ({
-              type: 'text',
-              title: String(header || ''),
-              width: 120
-            })),
-            minDimensions: [storedHeaders.length, Math.max(spreadsheetData.length, 20)],
-            allowInsertRow: true,
-            allowInsertColumn: true,
-            allowDeleteRow: true,
-            allowDeleteColumn: true,
-            allowRenameColumn: true,
-            contextMenu: true,
-            tableOverflow: true,
-            tableHeight: '600px',
-            tableWidth: '100%',
-            onselection: (instance: any, x1: number, y1: number, x2: number, y2: number) => {
-              updateSelectedColumns(instance, x1, y1, x2, y2)
-            },
-          })
-          setJspreadsheet(table)
-        } else {
-          // Initialize with default empty spreadsheet
-          const table = window.jspreadsheet(spreadsheetRef.current, {
-            data: Array(20).fill(null).map(() => Array(26).fill('')),
-            columns: Array(26).fill(null).map((_, i) => ({
-              type: 'text',
-              title: String.fromCharCode(65 + i), // A-Z
-              width: 120
-            })),
-            minDimensions: [26, 20],
-            allowInsertRow: true,
-            allowInsertColumn: true,
-            allowDeleteRow: true,
-            allowDeleteColumn: true,
-            allowRenameColumn: true,
-            contextMenu: true,
-            tableOverflow: true,
-            tableHeight: '600px',
-            tableWidth: '100%',
-            onselection: (instance: any, x1: number, y1: number, x2: number, y2: number) => {
-              updateSelectedColumns(instance, x1, y1, x2, y2)
-            },
-          })
-          setJspreadsheet(table)
-        }
-      }
-    }
 
     return () => {
-      // Don't destroy on unmount - keep the instance for when we come back
+      // Cleanup if needed
     }
   }, [])
 
-  // Separate effect to restore spreadsheet when component mounts and store has data
+  // Initialize x-spreadsheet
   useEffect(() => {
-    if (!isLoading && window.jspreadsheet && spreadsheetRef.current && !jspreadsheet) {
-      // Restore from store if data exists
-      if (spreadsheetData && storedHeaders && spreadsheetData.length > 0) {
-        const table = window.jspreadsheet(spreadsheetRef.current, {
-          data: spreadsheetData,
-          columns: storedHeaders.map((header) => ({
-            type: 'text',
-            title: String(header || ''),
-            width: 120
-          })),
-          minDimensions: [storedHeaders.length, Math.max(spreadsheetData.length, 20)],
-          allowInsertRow: true,
-          allowInsertColumn: true,
-          allowDeleteRow: true,
-          allowDeleteColumn: true,
-          allowRenameColumn: true,
-          contextMenu: true,
-          tableOverflow: true,
-          tableHeight: '600px',
-          tableWidth: '100%',
-          onselection: (instance: any, x1: number, y1: number, x2: number, y2: number) => {
-            updateSelectedColumns(instance, x1, y1, x2, y2)
+    if (isLoading || !spreadsheetRef.current || spreadsheet || !window.x_spreadsheet) return
+
+    // Initialize x-spreadsheet from CDN
+    const initSpreadsheet = () => {
+      try {
+        // Add custom CSS
+        const customCSS = document.createElement('style')
+        customCSS.textContent = `
+          .x-spreadsheet {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+          }
+          .x-spreadsheet-sheet {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+          }
+          .x-spreadsheet-toolbar {
+            display: none !important;
+          }
+          .x-spreadsheet-bottombar {
+            display: none !important;
+          }
+          .x-spreadsheet-selector {
+            border: 2px solid #3b82f6 !important;
+            background-color: rgba(59, 130, 246, 0.1);
+          }
+          .x-spreadsheet-selector-corner {
+            background-color: #3b82f6 !important;
+          }
+          #xspreadsheet-vis-tab {
+            width: 100%;
+            height: 600px;
+          }
+        `
+        document.head.appendChild(customCSS)
+        
+        const Spreadsheet = window.x_spreadsheet
+        
+        // Set container ID
+        const containerId = 'xspreadsheet-vis-tab'
+        if (spreadsheetRef.current) {
+          spreadsheetRef.current.id = containerId
+        }
+
+        // Initialize x-spreadsheet
+        const xs = new Spreadsheet(`#${containerId}`, {
+          mode: 'edit',
+          showToolbar: false,
+          showGrid: true,
+          showContextmenu: true,
+          showBottomBar: false,
+          view: {
+            height: () => 600,
+            width: () => spreadsheetRef.current?.clientWidth || 800,
+          },
+          row: {
+            len: 100,
+            height: 25,
+          },
+          col: {
+            len: 26,
+            width: 120,
+            indexWidth: 60,
+            minWidth: 60,
           },
         })
-        setJspreadsheet(table)
+
+        // Load data if available from store
+        if (spreadsheetData && storedHeaders && spreadsheetData.length > 0) {
+          const xsData = convertToXSpreadsheetFormat(spreadsheetData, storedHeaders)
+          xs.loadData([xsData])
+        } else {
+          // Initialize with empty data
+          const defaultHeaders = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
+          const defaultData = Array(20).fill(null).map(() => Array(26).fill(''))
+          const xsData = convertToXSpreadsheetFormat(defaultData, defaultHeaders)
+          xs.loadData([xsData])
+        }
+
+        // Bind cell selection event
+        xs.on('cells-selected', (cell: any, range: { sri: number; sci: number; eri: number; eci: number }) => {
+          const cols = []
+          for (let i = Math.min(range.sci, range.eci); i <= Math.max(range.sci, range.eci); i++) {
+            cols.push(i)
+          }
+          setSelectedColumns(cols)
+        })
+
+        // Bind cell edited event (optional - for future use)
+        xs.on('cell-edited', (text: string, ri: number, ci: number) => {
+          console.log('Cell edited:', { text, ri, ci })
+        })
+
+        setSpreadsheet(xs)
+      } catch (error) {
+        console.error('Failed to load x-data-spreadsheet:', error)
       }
     }
-  }, [isLoading, spreadsheetData, storedHeaders])
+
+    initSpreadsheet()
+  }, [isLoading, spreadsheetData, storedHeaders, spreadsheet])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -278,42 +289,21 @@ export function VisualizationTab() {
   }
 
   const createSpreadsheetWithData = (headers: any[], rows: any[][]) => {
-    // Destroy existing spreadsheet
-    if (jspreadsheet && spreadsheetRef.current) {
-      jspreadsheet.destroy()
-    }
+    if (!spreadsheet) return
 
-    // Create new spreadsheet with uploaded data
-    if (spreadsheetRef.current && window.jspreadsheet) {
-      const table = window.jspreadsheet(spreadsheetRef.current, {
-        data: rows.length > 0 ? rows : Array(20).fill(null).map(() => Array(headers.length).fill('')),
-        columns: headers.map((header, i) => ({
-          type: 'text',
-          title: String(header || ''),
-          width: 120
-        })),
-        minDimensions: [headers.length, Math.max(rows.length, 20)],
-        allowInsertRow: true,
-        allowInsertColumn: true,
-        allowDeleteRow: true,
-        allowDeleteColumn: true,
-        allowRenameColumn: true,
-        contextMenu: true,
-        tableOverflow: true,
-        tableHeight: '600px',
-        tableWidth: '100%',
-        onselection: (instance: any, x1: number, y1: number, x2: number, y2: number) => {
-          updateSelectedColumns(instance, x1, y1, x2, y2)
-        },
-      })
-      setJspreadsheet(table)
-      
-      // Save to visualization store
-      setSpreadsheetData(rows, headers, currentFilename)
-      
-      // Save dataset to store for Analysis page
-      saveDatasetToStore(headers, rows)
-    }
+    // Convert and load data into x-spreadsheet
+    const xsData = convertToXSpreadsheetFormat(
+      rows.length > 0 ? rows : Array(20).fill(null).map(() => Array(headers.length).fill('')),
+      headers
+    )
+    
+    spreadsheet.loadData([xsData])
+    
+    // Save to visualization store
+    setSpreadsheetData(rows, headers, currentFilename)
+    
+    // Save dataset to store for Analysis page
+    saveDatasetToStore(headers, rows)
   }
 
   const saveDatasetToStore = (headers: any[], rows: any[][]) => {
@@ -364,58 +354,71 @@ export function VisualizationTab() {
   }
 
   const handleAddRow = () => {
-    if (jspreadsheet) {
-      jspreadsheet.insertRow()
-    }
+    if (!spreadsheet) return
+    
+    // x-spreadsheet doesn't expose direct insert row API
+    // Workaround: extract data, add row, reload
+    const xsData = spreadsheet.getData()
+    const { data, headers } = convertFromXSpreadsheetFormat(xsData)
+    
+    // Add empty row
+    data.push(Array(headers.length).fill(''))
+    
+    // Reload data
+    const newXsData = convertToXSpreadsheetFormat(data, headers)
+    spreadsheet.loadData([newXsData])
+    
+    // Update store
+    setSpreadsheetData(data, headers, currentFilename)
   }
 
   const handleDeleteRow = () => {
-    if (jspreadsheet) {
-      const selectedRows = jspreadsheet.getSelectedRows()
-      if (selectedRows && selectedRows.length > 0) {
-        jspreadsheet.deleteRow(selectedRows.length)
-      } else {
-        jspreadsheet.deleteRow()
-      }
-    }
+    // Use right-click context menu for better UX
+    alert('Right-click on a row number and select "Delete Row" from the context menu')
   }
 
   const handleAddColumn = () => {
-    if (jspreadsheet) {
-      jspreadsheet.insertColumn()
-    }
+    if (!spreadsheet) return
+    
+    const xsData = spreadsheet.getData()
+    const { data, headers } = convertFromXSpreadsheetFormat(xsData)
+    
+    // Add new column header
+    headers.push(`Column ${headers.length + 1}`)
+    
+    // Add empty cells to each row
+    data.forEach(row => {
+      row.push('')
+    })
+    
+    // Reload data
+    const newXsData = convertToXSpreadsheetFormat(data, headers)
+    spreadsheet.loadData([newXsData])
+    
+    // Update store
+    setSpreadsheetData(data, headers, currentFilename)
   }
 
   const handleDeleteColumn = () => {
-    if (jspreadsheet) {
-      // Simply call deleteColumn - it deletes the currently selected column
-      jspreadsheet.deleteColumn()
-    }
-  }
-
-  const updateSelectedColumns = (instance: any, x1: number, y1: number, x2: number, y2: number) => {
-    const cols = []
-    for (let i = Math.min(x1, x2); i <= Math.max(x1, x2); i++) {
-      cols.push(i)
-    }
-    setSelectedColumns(cols)
+    // Use right-click context menu for better UX
+    alert('Right-click on a column header and select "Delete Column" from the context menu')
   }
 
   const handlePlot = () => {
-    if (!jspreadsheet || selectedColumns.length < 2) {
+    if (!spreadsheet || selectedColumns.length < 2) {
       alert('Please select at least 2 columns to create a plot')
       return
     }
 
-    const data = jspreadsheet.getData()
-    const headers = jspreadsheet.getHeaders().split(',')
+    // Get data from x-spreadsheet
+    const xsData = spreadsheet.getData()
+    const { data, headers } = convertFromXSpreadsheetFormat(xsData)
     
-    // Get column data
     const xCol = selectedColumns[0]
     const yCol = selectedColumns[1]
     
-    const xData = data.map((row: any[]) => row[xCol]).filter((val: any) => val !== '')
-    const yData = data.map((row: any[]) => row[yCol]).filter((val: any) => val !== '')
+    const xData = data.map((row: any[]) => row[xCol]).filter((val: any) => val !== null && val !== undefined && val !== '')
+    const yData = data.map((row: any[]) => row[yCol]).filter((val: any) => val !== null && val !== undefined && val !== '')
     
     const xLabel = headers[xCol] || `Column ${xCol + 1}`
     const yLabel = headers[yCol] || `Column ${yCol + 1}`
@@ -522,9 +525,11 @@ export function VisualizationTab() {
 
   // Update plot when settings change
   useEffect(() => {
-    if (plotData && jspreadsheet && selectedColumns.length >= 2) {
-      const data = jspreadsheet.getData()
-      const headers = jspreadsheet.getHeaders().split(',')
+    if (plotData && spreadsheet && selectedColumns.length >= 2) {
+      // Extract data from x-spreadsheet
+      const sheetData = spreadsheet.getData()
+      const { data, headers } = convertFromXSpreadsheetFormat(sheetData[0])
+      
       const xCol = selectedColumns[0]
       const yCol = selectedColumns[1]
       const xData = data.map((row: any[]) => row[xCol]).filter((val: any) => val !== '')
