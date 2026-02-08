@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Tree, NodeRendererProps, CreateHandler, RenameHandler, DeleteHandler, MoveHandler, TreeApi } from 'react-arborist'
 import { FolderPlus, FilePlus, FolderOpen, Folder, FileText, FileImage, FileSpreadsheet, Download, Trash2, ChevronRight, ChevronDown } from 'lucide-react'
 import { useFileManagerStore, TreeNode } from '@/lib/stores/fileManagerStore'
+import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 
 interface FileManagerSectionProps {
   projectId: string
+  isCollapsed?: boolean
 }
 
 // -- Icon helpers --
@@ -250,7 +252,7 @@ function FileNode({ node, style, dragHandle }: NodeRendererProps<ArboristNode>) 
 }
 
 // -- Main component --
-export function FileManagerSection({ projectId }: FileManagerSectionProps) {
+export function FileManagerSection({ projectId, isCollapsed = false }: FileManagerSectionProps) {
   const {
     nodes,
     setProjectId,
@@ -410,6 +412,32 @@ export function FileManagerSection({ projectId }: FileManagerSectionProps) {
     const selected = tree.selectedNodes[0]
     const parentId = selected?.data.isFolder ? selected.id : selected?.parent?.id || null
     tree.create({ type: 'internal', parentId, index: 0 })
+  }
+
+  // Collapsed view - just show an icon with tooltip
+  if (isCollapsed) {
+    const fileCount = Object.keys(nodes).length
+    return (
+      <div className="mb-2">
+        <AnimatedTooltip 
+          content={
+            <div className="min-w-[200px]">
+              <div className="font-semibold mb-1">Files</div>
+              <div className="text-xs text-gray-300">
+                {fileCount} {fileCount === 1 ? 'item' : 'items'}
+              </div>
+            </div>
+          }
+        >
+          <button
+            className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Files"
+          >
+            <FolderOpen className="h-5 w-5 text-blue-500" />
+          </button>
+        </AnimatedTooltip>
+      </div>
+    )
   }
 
   return (

@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import { Plus, FileText } from 'lucide-react'
 import { usePageStore } from '@/lib/stores/pageStore'
 import { PageItem } from './PageItem'
+import { AnimatedTooltip } from '@/components/ui/animated-tooltip'
 
 interface PageManagerSectionProps {
   projectId: string
+  isCollapsed?: boolean
 }
 
-export function PageManagerSection({ projectId }: PageManagerSectionProps) {
+export function PageManagerSection({ projectId, isCollapsed = false }: PageManagerSectionProps) {
   const { pages, isLoading, setProjectId, loadPages, createPage } = usePageStore()
   const [isCreating, setIsCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -36,6 +38,32 @@ export function PageManagerSection({ projectId }: PageManagerSectionProps) {
       setIsCreating(false)
       setNewTitle('')
     }
+  }
+
+  // Collapsed view - just show an icon with tooltip
+  if (isCollapsed) {
+    const pageCount = rootPages.length
+    return (
+      <div className="mb-2">
+        <AnimatedTooltip 
+          content={
+            <div className="min-w-[200px]">
+              <div className="font-semibold mb-1">Editor</div>
+              <div className="text-xs text-gray-300">
+                {pageCount} {pageCount === 1 ? 'page' : 'pages'}
+              </div>
+            </div>
+          }
+        >
+          <button
+            className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Editor pages"
+          >
+            <FileText className="h-5 w-5 text-gray-500" />
+          </button>
+        </AnimatedTooltip>
+      </div>
+    )
   }
 
   return (
