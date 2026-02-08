@@ -1,48 +1,61 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { useProjectAIChat } from '@/lib/hooks/useProjectAIChat'
+import { useState } from 'react'
 import { ResearchAIChat } from './ResearchAIChat'
 import { Button } from '@/components/ui/button'
 import { Sparkles, ChevronRight } from 'lucide-react'
 
 interface ProjectAIChatSidebarProps {
-  projectId: string // NEW: Required project ID
+  projectId: string
+  onWidthChange?: (width: number) => void
 }
 
-export function ProjectAIChatSidebar({ projectId }: ProjectAIChatSidebarProps) {
-  const { isOpen, closeSidebar, openSidebar, toggleSidebar } = useProjectAIChat()
-  const sidebarRef = useRef<HTMLDivElement>(null)
+export function ProjectAIChatSidebar({ projectId, onWidthChange }: ProjectAIChatSidebarProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
 
-  // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return
+  const COLLAPSED_WIDTH = 64
+  const EXPANDED_WIDTH = 400
 
-    const handleClickOutside = (e: MouseEvent) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
-        closeSidebar()
-      }
-    }
+  const currentWidth = (isExpanded || isHovering) ? EXPANDED_WIDTH : COLLAPSED_WIDTH
+  const isVisible = isExpanded || isHovering
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen, closeSidebar])
+  const handleMouseEnter = () => {
+    setIsHovering(true)
+    setIsExpanded(true) // Lock in expanded state on hover
+  }
 
-  // Toggle button position classes
-  const baseClasses = 'fixed top-1/2 -translate-y-1/2 z-50 transition-all duration-300 rounded-l-lg rounded-r-none shadow-lg bg-gradient-to-b from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0'
-  const positionClass = isOpen ? 'right-[400px]' : 'right-0'
-  const buttonClasses = `${baseClasses} ${positionClass}`
+  const handleMouseLeave = () => {
+    setIsHovering(false)
+    // Don't collapse - stays expanded until close button clicked
+  }
+
+  const handleClose = () => {
+    setIsExpanded(false)
+    setIsHovering(false)
+  }
 
   return (
-    <>
-      {/* Sidebar */}
-      <div
-        ref={sidebarRef}
-        className={`fixed right-0 top-0 h-full bg-white border-l shadow-2xl transition-all duration-300 ease-in-out z-40 ${isOpen ? 'w-[400px]' : 'w-0'}`}
-      >
-        {/* Expanded Sidebar Content */}
-        {isOpen && (
-          <div className="flex flex-col h-full">
+    <div
+      className="h-full bg-white border-l shadow-lg transition-all ease-in-out overflow-hidden"
+      style={{
+        width: `${currentWidth}px`,
+        transitionDuration: '200ms',
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div className="flex flex-col h-full" style={{ minWidth: `${currentWidth}px` }}>
+        {/* Collapsed State - Icon Only */}
+        {!isVisible && (
+          <div className="flex items-center justify-center h-full">
+            <Sparkles className="h-6 w-6 text-purple-600" />
+          </div>
+        )}
+
+        {/* Expanded State - Full Interface */}
+        {isVisible && (
+          <>
             {/* Header */}
             <div className="p-4 border-b bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
@@ -52,7 +65,7 @@ export function ProjectAIChatSidebar({ projectId }: ProjectAIChatSidebarProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={closeSidebar}
+                onClick={handleClose}
                 className="text-white hover:bg-white/20 h-8 w-8 p-0"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -63,17 +76,9 @@ export function ProjectAIChatSidebar({ projectId }: ProjectAIChatSidebarProps) {
             <div className="flex-1 flex flex-col min-h-0">
               <ResearchAIChat projectId={projectId} sidebarMode fullScreen />
             </div>
-          </div>
+          </>
         )}
       </div>
-
-      {/* Toggle Button - Always visible, peeks out from edge */}
-      <button
-        onClick={toggleSidebar}
-        className={`${buttonClasses} h-10 w-10 flex items-center justify-center`}
-      >
-        <Sparkles className="h-6 w-6" />
-      </button>
-    </>
+    </div>
   )
 }
