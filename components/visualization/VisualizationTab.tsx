@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Upload, Plus, Trash2, BarChart3, TrendingUp } from 'lucide-react'
+import { Upload, BarChart3 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -135,11 +135,8 @@ export function VisualizationTab() {
             font-size: 13px;
           }
           .x-spreadsheet-sheet {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-          }
-          .x-spreadsheet-toolbar {
-            display: none !important;
+            border: none;
+            border-radius: 0;
           }
           .x-spreadsheet-bottombar {
             display: none !important;
@@ -153,7 +150,7 @@ export function VisualizationTab() {
           }
           #xspreadsheet-vis-tab {
             width: 100%;
-            height: 600px;
+            height: 100%;
           }
         `
         document.head.appendChild(customCSS)
@@ -169,12 +166,12 @@ export function VisualizationTab() {
         // Initialize x-spreadsheet
         const xs = new Spreadsheet(`#${containerId}`, {
           mode: 'edit',
-          showToolbar: false,
+          showToolbar: true,
           showGrid: true,
           showContextmenu: true,
           showBottomBar: false,
           view: {
-            height: () => 600,
+            height: () => spreadsheetRef.current?.clientHeight || 600,
             width: () => spreadsheetRef.current?.clientWidth || 800,
           },
           row: {
@@ -351,57 +348,6 @@ export function VisualizationTab() {
       setShowHeaderDialog(false)
       setPendingFileData(null)
     }
-  }
-
-  const handleAddRow = () => {
-    if (!spreadsheet) return
-    
-    // x-spreadsheet doesn't expose direct insert row API
-    // Workaround: extract data, add row, reload
-    const xsData = spreadsheet.getData()
-    const { data, headers } = convertFromXSpreadsheetFormat(xsData)
-    
-    // Add empty row
-    data.push(Array(headers.length).fill(''))
-    
-    // Reload data
-    const newXsData = convertToXSpreadsheetFormat(data, headers)
-    spreadsheet.loadData([newXsData])
-    
-    // Update store
-    setSpreadsheetData(data, headers, currentFilename)
-  }
-
-  const handleDeleteRow = () => {
-    // Use right-click context menu for better UX
-    alert('Right-click on a row number and select "Delete Row" from the context menu')
-  }
-
-  const handleAddColumn = () => {
-    if (!spreadsheet) return
-    
-    const xsData = spreadsheet.getData()
-    const { data, headers } = convertFromXSpreadsheetFormat(xsData)
-    
-    // Add new column header
-    headers.push(`Column ${headers.length + 1}`)
-    
-    // Add empty cells to each row
-    data.forEach(row => {
-      row.push('')
-    })
-    
-    // Reload data
-    const newXsData = convertToXSpreadsheetFormat(data, headers)
-    spreadsheet.loadData([newXsData])
-    
-    // Update store
-    setSpreadsheetData(data, headers, currentFilename)
-  }
-
-  const handleDeleteColumn = () => {
-    // Use right-click context menu for better UX
-    alert('Right-click on a column header and select "Delete Column" from the context menu')
   }
 
   const handlePlot = () => {
@@ -591,8 +537,8 @@ export function VisualizationTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Toolbar */}
-      <div className="border-b bg-gray-50 p-3 flex items-center gap-3 flex-shrink-0">
+      {/* Minimal Toolbar */}
+      <div className="border-b bg-white px-3 py-2 flex items-center justify-between flex-shrink-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -611,74 +557,30 @@ export function VisualizationTab() {
           Upload File
         </Button>
 
-        <div className="h-6 w-px bg-gray-300" />
-
-        <Button
-          onClick={handleAddRow}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Row
-        </Button>
-
-        <Button
-          onClick={handleDeleteRow}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          Delete Row
-        </Button>
-
-        <Button
-          onClick={handleAddColumn}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add Column
-        </Button>
-
-        <Button
-          onClick={handleDeleteColumn}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-        >
-          <Trash2 className="h-4 w-4" />
-          Delete Column
-        </Button>
-
-        <div className="h-6 w-px bg-gray-300" />
-
         <Button
           onClick={handlePlot}
           disabled={selectedColumns.length < 2}
           size="sm"
-          className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
         >
-          <TrendingUp className="h-4 w-4" />
-          Plot {selectedColumns.length >= 2 ? `(${selectedColumns.length} cols)` : ''}
+          <BarChart3 className="h-4 w-4" />
+          {selectedColumns.length === 0 
+            ? 'Select Columns to Plot' 
+            : selectedColumns.length === 1
+            ? 'Select 1 More Column'
+            : `Plot ${selectedColumns.length} Columns`}
         </Button>
-
-        <div className="ml-auto text-xs text-gray-500">
-          Excel-like Spreadsheet • Click column headers to rename
-        </div>
       </div>
 
       {/* Split Container - Fixed 50/50 */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Spreadsheet */}
         <div 
-          className="overflow-x-auto overflow-y-auto border-r"
+          className="overflow-hidden border-r"
           style={{ width: '50%' }}
         >
-          <div className="p-4 min-w-max">
-            <div ref={spreadsheetRef} />
+          <div className="h-full w-full">
+            <div ref={spreadsheetRef} className="h-full w-full" />
           </div>
         </div>
 

@@ -22,12 +22,12 @@ export function ProjectAIChatSidebar({ projectId, onWidthChange }: ProjectAIChat
 
   const handleMouseEnter = () => {
     setIsHovering(true)
-    setIsExpanded(true) // Lock in expanded state on hover
+    setIsExpanded(true)
   }
 
   const handleMouseLeave = () => {
     setIsHovering(false)
-    // Don't collapse - stays expanded until close button clicked
+    setIsExpanded(false) // Close when mouse leaves the sidebar
   }
 
   const handleClose = () => {
