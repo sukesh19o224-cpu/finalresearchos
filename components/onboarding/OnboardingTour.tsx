@@ -96,7 +96,12 @@ export function OnboardingTour() {
   const step = tourSteps[currentStep]
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          localStorage.setItem('researchos_tour_completed', 'true')
+        }
+        setOpen(isOpen)
+      }}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl">{step.title}</DialogTitle>

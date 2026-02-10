@@ -263,12 +263,28 @@ export function FileManagerSection({ projectId, isCollapsed = false }: FileManag
 
   const treeRef = useRef<TreeApi<ArboristNode> | null>(null)
   const rootFileInputRef = useRef<HTMLInputElement>(null)
+  const treeContainerRef = useRef<HTMLDivElement>(null)
+  const [treeWidth, setTreeWidth] = useState(240)
   const [dndRoot, setDndRoot] = useState<globalThis.Node | null>(null)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     // Set dndRootElement to document.body so DnD works inside fixed sidebar
     setDndRoot(document.body)
+  }, [])
+
+  // Measure tree container width
+  useEffect(() => {
+    const el = treeContainerRef.current
+    if (!el) return
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setTreeWidth(Math.floor(entry.contentRect.width))
+      }
+    })
+    observer.observe(el)
+    setTreeWidth(el.clientWidth)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -502,6 +518,7 @@ export function FileManagerSection({ projectId, isCollapsed = false }: FileManag
           </div>
         </div>
       ) : (
+        <div ref={treeContainerRef} className="w-full">
         <Tree<ArboristNode>
           ref={treeRef}
           data={treeData}
@@ -510,7 +527,7 @@ export function FileManagerSection({ projectId, isCollapsed = false }: FileManag
           onMove={onMove}
           onDelete={onDelete}
           openByDefault={false}
-          width={280}
+          width={treeWidth}
           height={400}
           indent={16}
           rowHeight={30}
@@ -519,6 +536,7 @@ export function FileManagerSection({ projectId, isCollapsed = false }: FileManag
         >
           {FileNode}
         </Tree>
+        </div>
       )}
     </div>
   )

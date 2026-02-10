@@ -415,8 +415,6 @@ export function VisualizationTab() {
         },
         plot_bgcolor: 'white',
         paper_bgcolor: 'white',
-        width: 600,
-        height: 600,
         xaxis: {
           title: {
             text: xAxisTitle,
@@ -459,11 +457,11 @@ export function VisualizationTab() {
           bordercolor: '#cccccc',
           borderwidth: 1,
         },
-        autosize: false,
+        autosize: true,
         margin: { l: 60, r: 20, t: 60, b: 60 },
       },
-      config: { 
-        responsive: false,
+      config: {
+        responsive: true,
         scrollZoom: true,
       },
     })
@@ -498,7 +496,7 @@ export function VisualizationTab() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="flex flex-col bg-white rounded-xl border shadow-sm overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '600px' }}>
       {/* Header Dialog */}
       <Dialog open={showHeaderDialog} onOpenChange={setShowHeaderDialog}>
         <DialogContent>
@@ -590,14 +588,15 @@ export function VisualizationTab() {
           style={{ width: '50%' }}
         >
           {/* Plot Area */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto" style={{ minHeight: '400px' }}>
             {plotData ? (
-              <div className="h-full p-4">
+              <div className="h-full p-4" style={{ minHeight: '400px' }}>
                 <Plot
                   data={plotData.data}
                   layout={plotData.layout}
                   config={plotData.config}
                   style={{ width: '100%', height: '100%' }}
+                  useResizeHandler={true}
                 />
               </div>
             ) : (
