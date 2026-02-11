@@ -375,6 +375,9 @@ export function VisualizationTab() {
   }
 
   const generatePlot = (xData: any[], yData: any[], xLabel: string, yLabel: string) => {
+    // Use the user's chosen color
+    const traceColor = markerColor
+
     const trace: any = {
       x: xData,
       y: yData,
@@ -384,48 +387,70 @@ export function VisualizationTab() {
     if (plotType === 'scatter') {
       trace.type = 'scatter'
       trace.mode = 'markers'
-      trace.marker = { size: markerSize, color: markerColor }
+      trace.marker = {
+        size: markerSize,
+        color: traceColor,
+        opacity: 0.7,
+        symbol: 'circle',
+        line: { width: 0.5, color: '#000' },
+      }
     } else if (plotType === 'line') {
       trace.type = 'scatter'
       trace.mode = 'lines'
-      trace.line = { color: markerColor, width: 2 }
+      trace.line = { color: traceColor, width: 2, shape: 'linear' }
     } else if (plotType === 'bar') {
       trace.type = 'bar'
-      trace.marker = { color: markerColor }
+      trace.marker = { color: traceColor, line: { width: 0.5, color: '#000' } }
     } else if (plotType === 'scatter+line') {
       trace.type = 'scatter'
       trace.mode = 'lines+markers'
-      trace.marker = { size: markerSize, color: markerColor }
-      trace.line = { color: markerColor, width: 2 }
+      trace.marker = {
+        size: markerSize,
+        color: traceColor,
+        opacity: 0.7,
+        symbol: 'circle',
+        line: { width: 0.5, color: '#000' },
+      }
+      trace.line = { color: traceColor, width: 2, shape: 'linear' }
     }
 
-    const fontFamily = 'Arial, sans-serif'
-    const fontWeight = fontBold ? 'bold' : 'normal'
+    // Academic / publication font stack
+    const fontFamily = 'Inter, IBM Plex Sans, Helvetica Neue, Arial, sans-serif'
 
     setPlotData({
       data: [trace],
       layout: {
-        title: {
+        template: 'none',
+        title: plotTitle ? {
           text: plotTitle,
-          font: {
-            size: fontSize + 4,
-            family: fontFamily,
-            weight: fontWeight,
-          },
-        },
+          font: { size: fontSize + 2, family: fontFamily, color: '#111' },
+          x: 0.5,
+          xanchor: 'center',
+        } : undefined,
         plot_bgcolor: 'white',
         paper_bgcolor: 'white',
+        font: {
+          family: fontFamily,
+          size: fontSize,
+          color: '#111',
+        },
         xaxis: {
           title: {
             text: xAxisTitle,
-            font: { size: fontSize, family: fontFamily, weight: fontWeight },
+            font: { size: fontSize + 1, family: fontFamily, color: '#111' },
+            standoff: 12,
           },
           showline: true,
-          linecolor: '#000000',
-          linewidth: 2,
+          linecolor: '#000',
+          linewidth: 1,
           ticks: 'outside',
+          ticklen: 5,
+          tickwidth: 1,
+          tickcolor: '#000',
+          tickfont: { size: 11, family: fontFamily, color: '#333' },
           showgrid: showGrid,
-          gridcolor: '#e5e5e5',
+          gridcolor: showGrid ? 'rgba(0,0,0,0.05)' : undefined,
+          gridwidth: showGrid ? 1 : undefined,
           mirror: false,
           zeroline: false,
           nticks: xTickCount,
@@ -433,36 +458,43 @@ export function VisualizationTab() {
         yaxis: {
           title: {
             text: yAxisTitle,
-            font: { size: fontSize, family: fontFamily, weight: fontWeight },
+            font: { size: fontSize + 1, family: fontFamily, color: '#111' },
+            standoff: 8,
           },
           showline: true,
-          linecolor: '#000000',
-          linewidth: 2,
+          linecolor: '#000',
+          linewidth: 1,
           ticks: 'outside',
+          ticklen: 5,
+          tickwidth: 1,
+          tickcolor: '#000',
+          tickfont: { size: 11, family: fontFamily, color: '#333' },
           showgrid: showGrid,
-          gridcolor: '#e5e5e5',
+          gridcolor: showGrid ? 'rgba(0,0,0,0.05)' : undefined,
+          gridwidth: showGrid ? 1 : undefined,
           mirror: false,
           zeroline: false,
           nticks: yTickCount,
         },
         showlegend: showLegend,
         legend: {
-          font: { size: fontSize - 2 },
+          font: { size: 11, family: fontFamily, color: '#333' },
+          bgcolor: 'rgba(0,0,0,0)',
+          borderwidth: 0,
           orientation: 'v',
           x: 1,
           y: 1,
           xanchor: 'right',
           yanchor: 'top',
-          bgcolor: 'rgba(255,255,255,0.8)',
-          bordercolor: '#cccccc',
-          borderwidth: 1,
         },
+        hovermode: 'closest',
         autosize: true,
-        margin: { l: 60, r: 20, t: 60, b: 60 },
+        margin: { l: 60, r: 20, t: plotTitle ? 40 : 20, b: 50 },
       },
       config: {
+        displayModeBar: false,
         responsive: true,
-        scrollZoom: true,
+        scrollZoom: false,
       },
     })
   }
@@ -649,15 +681,20 @@ export function VisualizationTab() {
                   />
                 </div>
 
-                {/* Marker Color */}
+                {/* Trace Color */}
                 <div className="space-y-2">
-                  <Label className="text-xs">Marker Color</Label>
-                  <Input
-                    type="color"
-                    value={markerColor}
-                    onChange={(e) => setMarkerColor(e.target.value)}
-                    className="h-8"
-                  />
+                  <Label className="text-xs">Color</Label>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {['#2E3440','#5E81AC','#A3BE8C','#BF616A','#D08770','#B48EAD','#4C566A','#88C0D0'].map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setMarkerColor(c)}
+                        className={`w-6 h-6 rounded-sm border ${markerColor === c ? 'border-black ring-1 ring-black' : 'border-gray-300'}`}
+                        style={{ backgroundColor: c }}
+                        title={c}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 {/* Font Size */}

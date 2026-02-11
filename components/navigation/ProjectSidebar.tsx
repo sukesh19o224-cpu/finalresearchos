@@ -112,8 +112,8 @@ export function ProjectSidebar({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="flex flex-col h-full" style={{ minWidth: `${currentWidth}px` }}>
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <div className="flex flex-col h-full" style={{ minWidth: `${sidebarWidth}px` }}>
+        <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'p-2 space-y-1' : 'p-4 space-y-2'}`}>
           {/* File Manager Section */}
           <FileManagerSection projectId={projectId} isCollapsed={isCollapsed} />
 
@@ -121,7 +121,7 @@ export function ProjectSidebar({
           <PageManagerSection projectId={projectId} isCollapsed={isCollapsed} />
 
           {/* Research Tools - Moved to bottom */}
-          <div className={`pt-6 mt-6 border-t ${isCollapsed ? 'space-y-1' : ''}`}>
+          <div className={`${isCollapsed ? 'pt-2 mt-2 border-t space-y-1' : 'pt-6 mt-6 border-t'}`}>
             {!isCollapsed && (
               <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
                 Research Tools
