@@ -142,11 +142,14 @@ export function VisualizationTab() {
             display: none !important;
           }
           .x-spreadsheet-selector {
-            border: 2px solid #3b82f6 !important;
-            background-color: rgba(59, 130, 246, 0.1);
+            border: 2px solid #217346 !important;
+            background-color: transparent !important;
           }
           .x-spreadsheet-selector-corner {
-            background-color: #3b82f6 !important;
+            background-color: #217346 !important;
+          }
+          .x-spreadsheet-cell.selected {
+            background-color: white !important;
           }
           #xspreadsheet-vis-tab {
             width: 100%;
